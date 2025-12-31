@@ -15,9 +15,11 @@ export const api = {
         getEpisodes: (id) => axios.get(`${BASE}/anime/${id}/episodes`),
         getRelations: (id) => axios.get(`${BASE}/anime/${id}/relations`), 
         
-        search: (q, genreId = null) => {
+        // UPDATED: Now supports sorting (order_by and sort direction)
+        search: (q, genreId = null, orderBy = null, sort = 'desc') => {
             let url = `${BASE}/anime?q=${q}&sfw`;
             if (genreId) url += `&genres=${genreId}`;
+            if (orderBy) url += `&order_by=${orderBy}&sort=${sort}`;
             return axios.get(url);
         },
         getGenres: () => axios.get(`${BASE}/genres/anime`),
@@ -27,15 +29,12 @@ export const api = {
     manga: {
         getTop: () => axios.get(`${BASE}/top/manga`),
         getDetails: (id) => axios.get(`${BASE}/manga/${id}/full`),
-        
-        // UPDATED: Now supports sorting (order_by and sort direction)
         search: (q, genreId = null, orderBy = null, sort = 'desc') => {
             let url = `${BASE}/manga?q=${q}&sfw`;
             if (genreId) url += `&genres=${genreId}`;
             if (orderBy) url += `&order_by=${orderBy}&sort=${sort}`;
             return axios.get(url);
         },
-        
         getGenres: () => axios.get(`${BASE}/genres/manga`),
     },
 

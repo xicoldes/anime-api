@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaUserCircle } from 'react-icons/fa';
+import { FaSearch, FaDatabase } from 'react-icons/fa'; // Changed Icon
 import { useNavigate, Link } from 'react-router-dom';
 
 const Navbar = () => {
@@ -8,7 +8,6 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in
     const storedUser = localStorage.getItem('user');
     if (storedUser) setUser(storedUser);
   }, []);
@@ -27,41 +26,45 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-hianime-sidebar/95 backdrop-blur-sm px-6 py-3 flex items-center justify-between shadow-lg border-b border-white/5">
-      <div className="flex items-center gap-6">
-        <Link to="/" className="text-3xl font-black text-white tracking-tighter cursor-pointer decoration-transparent">
-          L<span className="text-hianime-accent">!</span>Anime
+    // Updated: Glassmorphism effect + Blue border bottom
+    <nav className="fixed top-0 w-full z-50 bg-hianime-dark/80 backdrop-blur-md px-6 py-4 flex items-center justify-between shadow-xl border-b border-white/5">
+      <div className="flex items-center gap-8">
+        {/* NEW LOGO: AnimeWiki */}
+        <Link to="/" className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 hover:opacity-80 transition">
+          <FaDatabase className="text-hianime-accent" />
+          <span>Anime<span className="text-hianime-accent">Wiki</span></span>
         </Link>
-        <div className="hidden md:flex gap-6 text-gray-300 font-semibold text-sm">
-            <Link to="/" className="hover:text-hianime-accent transition">Home</Link>
-            <Link to="/manga" className="hover:text-hianime-accent transition">Manga</Link>
-            <Link to="/watchlist" className="hover:text-hianime-accent transition">My Watchlist</Link>
+        
+        <div className="hidden md:flex gap-6 text-gray-400 font-medium text-sm">
+            <Link to="/" className="hover:text-white transition">Home</Link>
+            <Link to="/manga" className="hover:text-white transition">Manga Database</Link>
+            <Link to="/watchlist" className="hover:text-white transition">My Collections</Link>
         </div>
       </div>
 
       <div className="flex items-center gap-4">
-        <form onSubmit={handleSubmit} className="hidden md:flex bg-white rounded overflow-hidden h-9 w-64">
+        <form onSubmit={handleSubmit} className="hidden md:flex bg-hianime-sidebar border border-white/10 rounded-full overflow-hidden h-10 w-72 focus-within:border-hianime-accent transition duration-300">
             <input 
                 type="text" 
-                placeholder="Search anime..." 
-                className="flex-1 px-3 text-black text-sm outline-none"
+                placeholder="Search database..." 
+                className="flex-1 px-4 bg-transparent text-white text-sm outline-none placeholder-gray-500"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
             />
-            <button type="submit" className="px-3 text-gray-600 hover:text-black bg-gray-100">
+            <button type="submit" className="px-4 text-gray-400 hover:text-white">
                 <FaSearch />
             </button>
         </form>
         
         {user ? (
             <div className="flex items-center gap-3">
-                <span className="text-white text-sm font-bold capitalize hidden md:block">Hi, {user}</span>
-                <button onClick={handleLogout} className="bg-gray-700 text-white px-4 py-1.5 rounded font-bold hover:bg-gray-600 transition text-sm">
+                <span className="text-gray-300 text-sm font-medium capitalize hidden md:block">{user}</span>
+                <button onClick={handleLogout} className="bg-hianime-sidebar border border-white/10 text-white px-4 py-2 rounded-full font-bold hover:bg-red-500 hover:border-red-500 transition text-xs">
                     Logout
                 </button>
             </div>
         ) : (
-            <Link to="/login" className="bg-hianime-accent text-black px-5 py-1.5 rounded font-bold hover:bg-pink-300 transition text-sm">
+            <Link to="/login" className="bg-hianime-accent text-hianime-dark px-6 py-2 rounded-full font-bold hover:bg-white transition text-xs shadow-[0_0_10px_rgba(56,189,248,0.4)]">
                 Login
             </Link>
         )}
