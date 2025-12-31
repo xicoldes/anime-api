@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { FaSearch } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaSearch, FaUserCircle } from 'react-icons/fa';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [query, setQuery] = useState('');
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is logged in
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(storedUser);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -14,18 +21,21 @@ const Navbar = () => {
     }
   };
 
+  const handleLogout = () => {
+      localStorage.removeItem('user');
+      window.location.href = '/';
+  };
+
   return (
     <nav className="fixed top-0 w-full z-50 bg-hianime-sidebar/95 backdrop-blur-sm px-6 py-3 flex items-center justify-between shadow-lg border-b border-white/5">
       <div className="flex items-center gap-6">
-        {/* UPDATED LOGO */}
         <Link to="/" className="text-3xl font-black text-white tracking-tighter cursor-pointer decoration-transparent">
           L<span className="text-hianime-accent">!</span>Anime
         </Link>
-        
         <div className="hidden md:flex gap-6 text-gray-300 font-semibold text-sm">
             <Link to="/" className="hover:text-hianime-accent transition">Home</Link>
             <Link to="/manga" className="hover:text-hianime-accent transition">Manga</Link>
-            <span className="hover:text-hianime-accent cursor-pointer transition">Most Popular</span>
+            <Link to="/watchlist" className="hover:text-hianime-accent transition">My Watchlist</Link>
         </div>
       </div>
 
@@ -42,9 +52,19 @@ const Navbar = () => {
                 <FaSearch />
             </button>
         </form>
-        <button className="bg-hianime-accent text-black px-5 py-1.5 rounded font-bold hover:bg-pink-300 transition text-sm">
-            Login
-        </button>
+        
+        {user ? (
+            <div className="flex items-center gap-3">
+                <span className="text-white text-sm font-bold capitalize hidden md:block">Hi, {user}</span>
+                <button onClick={handleLogout} className="bg-gray-700 text-white px-4 py-1.5 rounded font-bold hover:bg-gray-600 transition text-sm">
+                    Logout
+                </button>
+            </div>
+        ) : (
+            <Link to="/login" className="bg-hianime-accent text-black px-5 py-1.5 rounded font-bold hover:bg-pink-300 transition text-sm">
+                Login
+            </Link>
+        )}
       </div>
     </nav>
   );

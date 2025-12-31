@@ -2,34 +2,46 @@ import axios from 'axios';
 
 const BASE = "https://api.jikan.moe/v4";
 
-// Helper to handle rate limits
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 export const api = {
     // --- ANIME ---
     anime: {
-        // We now return the full list for the slider
         getSpotlight: async () => {
-             const { data } = await axios.get(`${BASE}/top/anime?filter=bypopularity&limit=10`);
+             const { data } = await axios.get(`${BASE}/seasons/now?filter=tv&sfw&limit=10`);
              return data.data; 
         },
         getFull: (id) => axios.get(`${BASE}/anime/${id}/full`),
-        getCharacters: (id) => axios.get(`${BASE}/anime/${id}/characters`), // New Endpoint
+        getCharacters: (id) => axios.get(`${BASE}/anime/${id}/characters`),
         getStaff: (id) => axios.get(`${BASE}/anime/${id}/staff`),
         getEpisodes: (id) => axios.get(`${BASE}/anime/${id}/episodes`),
-        search: (q) => axios.get(`${BASE}/anime?q=${q}`),
+        getRelations: (id) => axios.get(`${BASE}/anime/${id}/relations`), 
+        
+        search: (q, genreId = null) => {
+            let url = `${BASE}/anime?q=${q}&sfw`;
+            if (genreId) url += `&genres=${genreId}`;
+            return axios.get(url);
+        },
+        getGenres: () => axios.get(`${BASE}/genres/anime`),
     },
 
-    // --- MANGA (New) ---
+    // --- MANGA ---
     manga: {
         getTop: () => axios.get(`${BASE}/top/manga`),
         getDetails: (id) => axios.get(`${BASE}/manga/${id}/full`),
-        search: (q) => axios.get(`${BASE}/manga?q=${q}`),
+        
+        // UPDATED: Now supports sorting (order_by and sort direction)
+        search: (q, genreId = null, orderBy = null, sort = 'desc') => {
+            let url = `${BASE}/manga?q=${q}&sfw`;
+            if (genreId) url += `&genres=${genreId}`;
+            if (orderBy) url += `&order_by=${orderBy}&sort=${sort}`;
+            return axios.get(url);
+        },
+        
+        getGenres: () => axios.get(`${BASE}/genres/manga`),
     },
 
     // --- TOP / TRENDING ---
     top: {
-        getAnime: () => axios.get(`${BASE}/top/anime`),
+        getAnime: () => axios.get(`${BASE}/top/anime?filter=airing`),
         getCharacters: () => axios.get(`${BASE}/top/characters`),
     },
 
