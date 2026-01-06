@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
-import { FaClock, FaStar, FaPlus, FaTv, FaCheck, FaChevronUp } from 'react-icons/fa';
+import { FaClock, FaStar, FaPlus, FaTv, FaCheck, FaChevronUp, FaPlay, FaGoogle } from 'react-icons/fa';
 
 const AnimeDetails = () => {
   const { id } = useParams();
@@ -9,27 +9,31 @@ const AnimeDetails = () => {
   const [characters, setCharacters] = useState([]);
   const [relations, setRelations] = useState([]);
   const [isAdded, setIsAdded] = useState(false);
-  const [showFullSynopsis, setShowFullSynopsis] = useState(false); // State for synopsis expander
+  const [showFullSynopsis, setShowFullSynopsis] = useState(false);
 
-  // Get current user (default to 'guest' if not logged in)
-  const user = localStorage.getItem('user') || 'guest';
+  const user = localStorage.getItem('user'); 
   const listKey = `watchlist_${user}`;
 
   useEffect(() => {
     window.scrollTo(0, 0);
     
-    // Check Watchlist
-    const savedList = JSON.parse(localStorage.getItem(listKey)) || [];
-    if (savedList.includes(id)) {
-        setIsAdded(true);
+    if (user) {
+        const savedList = JSON.parse(localStorage.getItem(listKey)) || [];
+        if (savedList.includes(id)) {
+            setIsAdded(true);
+        }
     }
 
     api.anime.getFull(id).then(res => setAnime(res.data.data));
     api.anime.getCharacters(id).then(res => setCharacters(res.data.data));
     api.anime.getRelations(id).then(res => setRelations(res.data.data));
-  }, [id, listKey]);
+  }, [id, listKey, user]);
 
-  const toggleList = () => {
+  const handleAddToList = () => {
+      if (!user) {
+          alert("Please login to add anime to your watchlist!");
+          return;
+      }
       let savedList = JSON.parse(localStorage.getItem(listKey)) || [];
       if (isAdded) {
           savedList = savedList.filter(animeId => animeId !== id);
@@ -43,28 +47,18 @@ const AnimeDetails = () => {
 
   if (!anime) return <div className="h-screen flex items-center justify-center text-hianime-accent">Loading...</div>;
 
-  const backgroundMap = anime.trailer?.images?.maximum_image_url || 
-                        anime.trailer?.images?.large_image_url || 
-                        anime.images.jpg.large_image_url;
-  const isPoster = backgroundMap === anime.images.jpg.large_image_url;
-
   return (
-    <div className="min-h-screen pt-20 pb-20">
-        {/* Banner */}
-        <div 
-            className={`h-[50vh] bg-cover bg-center relative ${isPoster ? "blur-xl scale-110 opacity-50" : "opacity-80"}`} 
-            style={{backgroundImage: `url(${backgroundMap})`}}
-        >
-            <div className="absolute inset-0 bg-gradient-to-t from-hianime-dark via-hianime-dark/60 to-black/40"></div>
-        </div>
+    <div className="min-h-screen pb-20 bg-hianime-dark">
+        {/* REMOVED BANNER SECTION COMPLETELY */}
 
-        <div className="max-w-[1400px] mx-auto px-6 -mt-32 relative z-10 flex flex-col lg:flex-row gap-12">
+        {/* Main Content - Added mt-24 to push it below the navbar */}
+        <div className="max-w-[1400px] mx-auto px-6 mt-24 flex flex-col lg:flex-row gap-12 animate-fade-in">
             
             {/* Left Column */}
             <div className="flex-1">
-                <div className="flex flex-col md:flex-row gap-8 mb-8">
+                <div className="flex flex-col md:flex-row gap-8 mb-12">
                     <img src={anime.images.jpg.large_image_url} className="w-64 h-96 object-cover rounded-lg shadow-2xl border-4 border-hianime-sidebar self-start" />
-                    <div className="pt-4 md:pt-12">
+                    <div className="pt-4">
                         <div className="text-hianime-accent text-sm font-bold tracking-widest mb-2">#Ranked {anime.rank}</div>
                         <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight">{anime.title}</h1>
                         
@@ -78,9 +72,9 @@ const AnimeDetails = () => {
 
                         <div className="flex gap-4 mb-8">
                             <button 
-                                onClick={toggleList}
+                                onClick={handleAddToList}
                                 className={`px-8 py-3 rounded-full font-bold flex items-center gap-2 transition border border-white/10 ${
-                                    isAdded ? "bg-green-500 text-black hover:bg-green-400" : "bg-gray-800 text-white hover:bg-gray-700"
+                                    isAdded ? "bg-green-500 text-black hover:bg-green-400" : "bg-hianime-sidebar text-white hover:bg-hianime-accent hover:text-black"
                                 }`}
                             >
                                 {isAdded ? <FaCheck /> : <FaPlus />} 
@@ -88,8 +82,7 @@ const AnimeDetails = () => {
                             </button>
                         </div>
 
-                        {/* SYNOPSIS with + Button */}
-                        <div className="relative">
+                        <div className="relative mb-8">
                             <p className={`text-gray-300 leading-relaxed text-sm mb-2 transition-all ${showFullSynopsis ? '' : 'line-clamp-4'}`}>
                                 {anime.synopsis}
                             </p>
@@ -100,10 +93,20 @@ const AnimeDetails = () => {
                                 {showFullSynopsis ? <><FaChevronUp /> Show Less</> : <><FaPlus /> Read More</>}
                             </button>
                         </div>
+
+                        {anime.trailer?.embed_url && (
+                            <div className="mb-8">
+                                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                    <FaPlay className="text-hianime-accent text-sm" /> Official Trailer
+                                </h3>
+                                <div className="aspect-video w-full rounded-xl overflow-hidden shadow-2xl border border-hianime-sidebar bg-black">
+                                    <iframe src={anime.trailer.embed_url} title="Trailer" className="w-full h-full" allowFullScreen></iframe>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* Characters Section */}
                 <div className="mb-12">
                     <h2 className="text-2xl font-bold text-hianime-accent mb-6 border-l-4 border-hianime-accent pl-4">Characters & Voice Actors</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -134,37 +137,54 @@ const AnimeDetails = () => {
                 </div>
             </div>
 
-            {/* --- RIGHT SIDEBAR (Restored Full Details) --- */}
+            {/* Right Sidebar */}
             <div className="w-full lg:w-80 shrink-0">
                 <div className="bg-hianime-sidebar p-6 rounded-xl border border-white/5 mb-8 text-sm">
                     <div className="mb-4"><span className="font-bold text-white">Japanese:</span> <span className="text-gray-400">{anime.title_japanese}</span></div>
-                    <div className="mb-4"><span className="font-bold text-white">Synonyms:</span> <span className="text-gray-400">{anime.title_synonyms?.join(', ') || 'N/A'}</span></div>
                     <div className="mb-4"><span className="font-bold text-white">Aired:</span> <span className="text-gray-400">{anime.aired.string}</span></div>
-                    <div className="mb-4"><span className="font-bold text-white">Premiered:</span> <span className="text-gray-400">{anime.season} {anime.year}</span></div>
-                    <div className="mb-4"><span className="font-bold text-white">Duration:</span> <span className="text-gray-400">{anime.duration}</span></div>
                     <div className="mb-4"><span className="font-bold text-white">Status:</span> <span className="text-gray-400">{anime.status}</span></div>
                     <div className="mb-4"><span className="font-bold text-white">MAL Score:</span> <span className="text-gray-400">{anime.score}</span></div>
-                    <div className="mb-4"><span className="font-bold text-white">Episodes:</span> <span className="text-gray-400">{anime.episodes || 'Unknown'}</span></div>
                     
+                    {/* CLICKABLE GENRES */}
                     <div className="mb-4 border-t border-white/10 pt-4">
                         <span className="font-bold text-white block mb-2">Genres:</span>
                         <div className="flex flex-wrap gap-2">
                             {anime.genres.map(g => (
-                                <span key={g.mal_id} className="text-xs border border-gray-600 px-2 py-1 rounded-full text-gray-300 hover:text-hianime-accent cursor-pointer transition">{g.name}</span>
+                                <Link 
+                                    to={`/?genre=${g.mal_id}`} 
+                                    key={g.mal_id} 
+                                    className="text-xs border border-gray-600 px-2 py-1 rounded-full text-gray-300 hover:bg-hianime-accent hover:text-black hover:border-hianime-accent cursor-pointer transition"
+                                >
+                                    {g.name}
+                                </Link>
                             ))}
                         </div>
                     </div>
+
+                    {/* CLICKABLE STUDIOS */}
                     <div className="mb-4 border-t border-white/10 pt-4">
                         <span className="font-bold text-white block mb-2">Studios:</span>
-                        <div className="text-hianime-accent">{anime.studios.map(s => s.name).join(', ')}</div>
+                        <div className="flex flex-wrap gap-2">
+                            {anime.studios.map(s => (
+                                <a 
+                                    key={s.mal_id}
+                                    href={`https://www.google.com/search?q=${s.name}+anime+studio`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-hianime-accent hover:underline flex items-center gap-1"
+                                >
+                                    {s.name} <FaGoogle className="text-[10px]" />
+                                </a>
+                            ))}
+                        </div>
                     </div>
+                    
                     <div className="mb-4">
                         <span className="font-bold text-white block mb-2">Producers:</span>
                         <div className="text-gray-400 text-xs">{anime.producers.map(p => p.name).join(', ')}</div>
                     </div>
                 </div>
 
-                {/* Related Anime */}
                 <div className="bg-hianime-sidebar p-6 rounded-xl border border-white/5">
                     <h3 className="font-bold text-hianime-accent mb-4 text-lg">Related Anime</h3>
                     <div className="flex flex-col gap-4">

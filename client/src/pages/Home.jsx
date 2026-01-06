@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom'; // Import useSearchParams
 import Hero from '../components/Hero';
 import Trending from '../components/Trending';
 import { api } from '../services/api';
@@ -11,7 +11,9 @@ const Home = () => {
   const [latest, setLatest] = useState([]);
   const [genres, setGenres] = useState([]);
   
-  // Filter & Sort State
+  // Search Params logic
+  const [searchParams] = useSearchParams();
+  
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [filteredAnimes, setFilteredAnimes] = useState(null); 
   const [showFilter, setShowFilter] = useState(false);
@@ -38,7 +40,21 @@ const Home = () => {
     fetchData();
   }, []);
 
-  // Centralized Search (Handles Genre + Sort)
+  // NEW: Listen for URL Genre change (e.g. from Details page)
+  useEffect(() => {
+      const genreParam = searchParams.get('genre');
+      if (genreParam) {
+          const genreId = parseInt(genreParam);
+          setSelectedGenre(genreId);
+          setShowFilter(true);
+          performSearch(genreId, selectedSort);
+          // Scroll down to results
+          setTimeout(() => {
+              window.scrollTo({ top: window.innerHeight * 0.6, behavior: 'smooth' });
+          }, 500);
+      }
+  }, [searchParams]);
+
   const performSearch = async (genreId, sortValue) => {
     let orderBy = null;
     let sort = 'desc'; 
@@ -48,7 +64,7 @@ const Home = () => {
         case 'popularity': orderBy = 'popularity'; break;
         case 'title': orderBy = 'title'; sort = 'asc'; break;
         case 'start_date': orderBy = 'start_date'; break;
-        case 'episodes': orderBy = 'episodes'; break; // Specific to Anime
+        case 'episodes': orderBy = 'episodes'; break;
         case 'favorites': orderBy = 'favorites'; break;
         default: orderBy = null;
     }
@@ -58,14 +74,13 @@ const Home = () => {
             const res = await api.anime.search('', genreId, orderBy, sort);
             setFilteredAnimes(res.data.data);
         } else {
-            setFilteredAnimes(null); // Reset to default "Latest" view
+            setFilteredAnimes(null);
         }
     } catch (err) {
         console.error(err);
     }
   };
 
-  // Handlers
   const handleGenreClick = (genreId) => {
     setSelectedGenre(genreId);
     performSearch(genreId, selectedSort);
@@ -90,17 +105,14 @@ const Home = () => {
 
       <div className="max-w-[1400px] mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        {/* Main Content */}
         <div className="lg:col-span-3">
             
-            {/* Header Bar with Sort & Filter */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <h2 className="text-2xl font-bold text-hianime-accent self-start md:self-auto">
                     {filteredAnimes ? `Search Results` : `Latest Episodes`}
                 </h2>
                 
                 <div className="flex gap-4 w-full md:w-auto">
-                    {/* SORT DROPDOWN */}
                     <div className="relative flex items-center bg-hianime-sidebar px-3 py-2 rounded border border-white/10">
                         <FaSortAmountDown className="text-gray-400 mr-2" />
                         <select 
@@ -126,7 +138,6 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* Filter Panel */}
             {showFilter && (
                 <div className="bg-hianime-sidebar p-6 rounded-xl mb-8 border border-white/5 animate-fade-in">
                     <div className="flex justify-between items-center mb-4">
@@ -153,7 +164,6 @@ const Home = () => {
                 </div>
             )}
 
-            {/* Anime Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {(filteredAnimes || latest.slice(0, 12)).map(anime => (
                     <Link to={`/anime/${anime.mal_id}`} key={anime.mal_id} className="group relative cursor-pointer">
@@ -166,7 +176,6 @@ const Home = () => {
                             <div className="absolute top-2 left-2 bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
                                 Ep {anime.episodes || '?'}
                             </div>
-                            {/* Hover Overlay */}
                             <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-center items-center p-4 text-center">
                                 <span className="text-hianime-accent text-sm font-bold mb-2">View Details</span>
                                 <span className="text-xs text-gray-300">{anime.type} • {anime.year || 'N/A'}</span>
@@ -184,7 +193,6 @@ const Home = () => {
             )}
         </div>
 
-        {/* Sidebar */}
         <div className="lg:col-span-1">
             <Trending animes={trending} />
         </div>
