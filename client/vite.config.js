@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   preview: {
     allowedHosts: [
-      "https://https-github-com-xicoldes-anime-api.onrender.com/", // Add your specific Render URL
+      "https-github-com-xicoldes-anime-api.onrender.com", // Add your specific Render URL
       "localhost"
     ]
   }
