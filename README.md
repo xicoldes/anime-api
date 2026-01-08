@@ -58,7 +58,7 @@ Follow these steps to run the project locally.
 ```bash
 git clone [https://github.com/yourusername/animewiki.git](https://github.com/yourusername/animewiki.git)
 cd animewiki
-2. Install Dependencies
+2. Install Frontend Dependencies
 Navigate to the client folder where the React app lives:
 
 Bash
@@ -74,31 +74,40 @@ The app will launch at http://localhost:5173.
 📂 Project Structure
 Plaintext
 
-client/
-├── public/
-├── src/
-│   ├── components/
-│   │   ├── Hero.jsx          # Spotlight slider logic
-│   │   ├── Navbar.jsx        # Top nav with Live Search
-│   │   └── Trending.jsx      # Sidebar rankings
-│   ├── pages/
-│   │   ├── Home.jsx          # Landing page with filters
-│   │   ├── AnimeDetails.jsx  # Single anime info
-│   │   ├── Manga.jsx         # Top Manga list
-│   │   ├── MangaDetails.jsx  # Single manga info
-│   │   ├── Movies.jsx        # Top Movies list
-│   │   ├── Login.jsx         # Simulated login
-│   │   ├── Search.jsx        # Search results grid
-│   │   └── Watchlist.jsx     # User collections dashboard
-│   ├── services/
-│   │   └── api.js            # Centralized Jikan API config
-│   ├── App.jsx               # Route definitions
-│   ├── main.jsx              # App entry point
-│   └── index.css             # Tailwind imports
-├── index.html
-├── package.json
-├── tailwind.config.js
-└── vite.config.js
+ANIME-API/
+├── client/                   # Frontend React Application
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/       # Reusable UI components
+│   │   │   ├── Hero.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   └── Trending.jsx
+│   │   ├── pages/            # Page components
+│   │   │   ├── AnimeDetails.jsx
+│   │   │   ├── Home.jsx
+│   │   │   ├── Login.jsx
+│   │   │   ├── Manga.jsx
+│   │   │   ├── MangaDetails.jsx
+│   │   │   ├── Movies.jsx
+│   │   │   ├── Search.jsx
+│   │   │   └── Watchlist.jsx
+│   │   ├── services/         # API handling
+│   │   │   └── api.js
+│   │   ├── App.css
+│   │   ├── App.jsx           # Main Frontend Route Setup
+│   │   ├── index.css         # Global Styles (Tailwind)
+│   │   └── main.jsx          # React Entry Point
+│   ├── index.html
+│   ├── package.json
+│   ├── tailwind.config.js
+│   └── vite.config.js
+├── controllers/              # Backend Logic
+│   └── animeController.js
+├── routes/                   # Backend Routes
+│   └── animeRoutes.js
+├── app.js                    # Backend Entry Point
+├── package.json              # Root Dependencies
+└── README.md                 # Project Documentation
 🚀 Deployment (Render)
 This project is optimized for deployment on Render.
 
