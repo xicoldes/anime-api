@@ -2,8 +2,8 @@
 
 AnimeWiki is a modern, responsive React application serving as a comprehensive database for Anime, Manga, and Movies. Built with a focus on sleek UI/UX inspired by top streaming platforms, it utilizes the **Jikan API** (unofficial MyAnimeList API) to provide real-time data.
 
-![AnimeWiki Preview](https://via.placeholder.com/1000x500?text=AnimeWiki+Screenshot) 
-*(Replace this link with a real screenshot of your app later!)*
+<img width="1919" height="1057" alt="image" src="https://github.com/user-attachments/assets/edb9a99b-ceb2-4277-8316-52f379ca5166" />
+
 
 ## 🚀 Features
 
@@ -56,24 +56,27 @@ Follow these steps to run the project locally.
 
 ### **1. Clone the Repository**
 ```bash
-git clone [https://github.com/yourusername/animewiki.git](https://github.com/yourusername/animewiki.git)
+git clone https://github.com/xicoldes/animewiki.git
+
 cd animewiki
-2. Install Frontend Dependencies
+```
+### **2. Install Frontend Dependencies**
+
 Navigate to the client folder where the React app lives:
-
-Bash
-
+```bash
 cd client
-npm install
-3. Start the Development Server
-Bash
 
+npm install
+```
+### **3. Start the Development Server**
+```bash
 npm run dev
+```
 The app will launch at http://localhost:5173.
 
-📂 Project Structure
-Plaintext
 
+## 📂 Project Structure
+```bash
 ANIME-API/
 ├── client/                   # Frontend React Application
 │   ├── src/
@@ -108,25 +111,30 @@ ANIME-API/
 ├── app.js                    # Backend Entry Point
 ├── package.json              # Root Dependencies
 └── README.md                 # Project Documentation
-🚀 Deployment (Render)
+```
+
+
+## 🚀 Deployment (Render)
 This project is optimized for deployment on Render.
 
-New Static Site: Connect your GitHub repo.
+1. New Static Site: Connect your GitHub repo.
 
-Root Directory: client
+2. Root Directory: client
 
-Build Command: npm install; npm run build
+3. Build Command: npm install; npm run build
 
-Publish Directory: dist
+4. Publish Directory: dist
 
 Note: If you encounter a "Route not found" error on refresh, you may need to add a rewrite rule in Render settings (Source: /* -> Destination: /index.html).
 
-⚠️ Disclaimer
+
+## ⚠️ Disclaimer
 This project uses the free Jikan API.
 
-Rate Limits: You may experience a 429 error if you refresh too rapidly. This is a limitation of the free API tier.
+- Rate Limits: You may experience a 429 error if you refresh too rapidly. This is a limitation of the free API tier.
 
-Data: All data is provided by MyAnimeList via Jikan.
+- Data: All data is provided by MyAnimeList via Jikan.
 
-📝 License
+
+## 📝 License
 This project is for educational purposes.
