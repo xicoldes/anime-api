@@ -2,7 +2,7 @@
 
 AnimeWiki is a modern, responsive React application serving as a comprehensive database for Anime, Manga, and Movies. Built with a focus on sleek UI/UX inspired by top streaming platforms, it utilizes the **Jikan API** (unofficial MyAnimeList API) to provide real-time data.
 
-<img width="1919" height="1057" alt="image" src="https://github.com/user-attachments/assets/edb9a99b-ceb2-4277-8316-52f379ca5166" />
+<img width="1919" height="1057" alt="Screenshot 2026-01-09 033559" src="https://github.com/user-attachments/assets/6ae4281f-1dc9-4f25-a164-923c91deddb5" />
 
 
 ## 🚀 Features
