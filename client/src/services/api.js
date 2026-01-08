@@ -15,7 +15,6 @@ export const api = {
         getEpisodes: (id) => axios.get(`${BASE}/anime/${id}/episodes`),
         getRelations: (id) => axios.get(`${BASE}/anime/${id}/relations`), 
         
-        // UPDATED: Now supports sorting (order_by and sort direction)
         search: (q, genreId = null, orderBy = null, sort = 'desc') => {
             let url = `${BASE}/anime?q=${q}&sfw`;
             if (genreId) url += `&genres=${genreId}`;
@@ -29,6 +28,9 @@ export const api = {
     manga: {
         getTop: () => axios.get(`${BASE}/top/manga`),
         getDetails: (id) => axios.get(`${BASE}/manga/${id}/full`),
+        getCharacters: (id) => axios.get(`${BASE}/manga/${id}/characters`), // ADDED THIS
+        getRelations: (id) => axios.get(`${BASE}/manga/${id}/relations`),   // ADDED THIS
+        
         search: (q, genreId = null, orderBy = null, sort = 'desc') => {
             let url = `${BASE}/manga?q=${q}&sfw`;
             if (genreId) url += `&genres=${genreId}`;
