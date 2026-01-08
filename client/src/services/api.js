@@ -24,12 +24,18 @@ export const api = {
         getGenres: () => axios.get(`${BASE}/genres/anime`),
     },
 
+    // --- MOVIES (FIXED) ---
+    // We use the /top/anime endpoint you found, but filter by type=movie
+    movies: {
+        getTop: () => axios.get(`${BASE}/top/anime?type=movie&filter=bypopularity`),
+    },
+
     // --- MANGA ---
     manga: {
         getTop: () => axios.get(`${BASE}/top/manga`),
         getDetails: (id) => axios.get(`${BASE}/manga/${id}/full`),
-        getCharacters: (id) => axios.get(`${BASE}/manga/${id}/characters`), // ADDED THIS
-        getRelations: (id) => axios.get(`${BASE}/manga/${id}/relations`),   // ADDED THIS
+        getCharacters: (id) => axios.get(`${BASE}/manga/${id}/characters`),
+        getRelations: (id) => axios.get(`${BASE}/manga/${id}/relations`),
         
         search: (q, genreId = null, orderBy = null, sort = 'desc') => {
             let url = `${BASE}/manga?q=${q}&sfw`;
