@@ -1,78 +1,75 @@
-AnimeWiki
-AnimeWiki is a modern, responsive React application that serves as a comprehensive database for Anime, Manga, and Anime Movies. Built with a focus on sleek UI/UX (inspired by streaming platforms like h!anime), it utilizes the Jikan API (unofficial MyAnimeList API) to provide real-time data.
+# AnimeWiki 🎥
 
-🚀 Features
-1. Home Page
-Dynamic Spotlight Slider: A panoramic, auto-sliding hero section showcasing trending anime with a "h!anime" style layout (Text on left, Image on right).
+AnimeWiki is a modern, responsive React application serving as a comprehensive database for Anime, Manga, and Movies. Built with a focus on sleek UI/UX inspired by top streaming platforms, it utilizes the **Jikan API** (unofficial MyAnimeList API) to provide real-time data.
 
-Latest Episodes: A grid view of currently airing anime episodes.
+![AnimeWiki Preview](https://via.placeholder.com/1000x500?text=AnimeWiki+Screenshot) 
+*(Replace this link with a real screenshot of your app later!)*
 
-Popular Movies: A dedicated section for top-rated and popular anime movies.
+## 🚀 Features
 
-Trending Sidebar: A vertical list of top-ranked anime.
+### **1. 🏠 Home Page**
+* **Spotlight Slider:** A panoramic, auto-sliding hero section showcasing trending anime with a professional "Text-Left, Image-Right" layout.
+    * *Interactive:* Supports click-and-drag (or swipe) navigation.
+    * *Visuals:* Includes progress indicators and navigation dots.
+* **Latest Episodes:** Real-time updates of currently airing episodes.
+* **Popular Movies:** A dedicated section highlighting top-rated anime movies.
+* **Trending Sidebar:** A quick-look vertical list of top-ranked series.
+* **Smart Filtering:** Filter content by **Genre** or sort by **Popularity, Score, Name, Date, etc.**
 
-Smart Filtering: Filter content by Genre or sort by Popularity, Score, Name, etc.
+### **2. 🔍 Advanced Search**
+* **Live Search Bar:** A smart dropdown that instantly shows results with thumbnails as you type.
+    * *Context Aware:* Automatically switches between searching **Anime** or **Manga** based on the current page.
+* **Dedicated Search Page:** A full results grid for deep diving into specific queries.
 
-2. Advanced Search & Navigation
-Live Search Bar: A dropdown search bar that instantly shows results with thumbnails as you type.
+### **3. 📚 Content Databases**
+* **Movies Page:** A standalone page ranking the top Anime Movies of all time.
+* **Manga Page:** A dedicated section for browsing top-rated Manga.
+* **Detailed Info:**
+    * **Anime:** Synopsis, score, rank, trailer, characters, voice actors, and relations.
+    * **Manga:** Authors, volumes, published dates, and genres.
+    * **External Links:** Clickable studios and authors redirect to Google searches.
 
-Context Aware: Automatically switches between searching Anime or Manga depending on which page you are viewing.
+### **4. 👤 User Features (Simulated)**
+* **Login System:** A lightweight, frontend-only authentication system using LocalStorage.
+* **My Collections:**
+    * **Watchlist:** Save your favorite Anime.
+    * **Manga Collection:** Save Manga you are reading.
+    * *Note:* "Add to List" buttons are protected and require login.
 
-Dedicated Pages: Separate pages for Movies and Manga to keep content organized.
+---
 
-3. Detailed Information Pages
-Anime Details: View synopsis, score, rank, studio, trailer, characters, voice actors, and related anime.
+## 🛠️ Tech Stack
 
-Manga Details: View authors, published dates, volumes, and related adaptations.
+* **Frontend:** React.js (Vite)
+* **Styling:** Tailwind CSS
+* **Routing:** React Router DOM (v6)
+* **Icons:** React Icons (FontAwesome)
+* **Data Fetching:** Axios
+* **API:** [Jikan API v4](https://jikan.moe/)
+* **Deployment:** Render
 
-Clickable Metadata: Clicking on a genre or studio instantly redirects you to a filtered search or Google search for that studio.
+---
 
-4. User Features (Simulated)
-Login System: A simulated login allowing users to "sign in" and access personal features without a backend database.
+## 📦 Installation & Setup
 
-Watchlist & Collections:
+Follow these steps to run the project locally.
 
-Add to List: Users can add Anime to a Watchlist and Manga to a Collection.
-
-Protected Actions: The "Add to List" button requires a user to be logged in.
-
-My Collections Page: A dedicated dashboard displaying your saved Anime and Manga in separate, scrollable carousels.
-
-🛠️ Tech Stack
-Frontend Framework: React.js (Vite)
-
-Styling: Tailwind CSS
-
-Routing: React Router DOM (v6)
-
-Icons: React Icons (FontAwesome)
-
-HTTP Client: Axios
-
-Data Source: Jikan API v4 (Open Source MyAnimeList API)
-
-Deployment: Render
-
-📦 Installation & Setup
-Follow these steps to run the project locally on your machine.
-
-Prerequisites
-Node.js installed (v16 or higher recommended).
-
-1. Clone the Repository
-git clone https://github.com/yourusername/animewiki.git
+### **1. Clone the Repository**
+```bash
+git clone [https://github.com/yourusername/animewiki.git](https://github.com/yourusername/animewiki.git)
 cd animewiki
-
 2. Install Dependencies
-Navigate to the client folder (where the React app lives) and install the libraries:
+Navigate to the client folder where the React app lives:
+
+Bash
 
 cd client
 npm install
-
 3. Start the Development Server
+Bash
 
 npm run dev
-The app should now be running at http://localhost:5173.
+The app will launch at http://localhost:5173.
 
 📂 Project Structure
 Plaintext
@@ -81,42 +78,46 @@ client/
 ├── public/
 ├── src/
 │   ├── components/
-│   │   ├── Hero.jsx          # Spotlight slider with drag/swipe support
-│   │   ├── Navbar.jsx        # Top navigation with Live Search logic
-│   │   └── Trending.jsx      # Sidebar for top ranked anime
+│   │   ├── Hero.jsx          # Spotlight slider logic
+│   │   ├── Navbar.jsx        # Top nav with Live Search
+│   │   └── Trending.jsx      # Sidebar rankings
 │   ├── pages/
-│   │   ├── Home.jsx          # Main landing page with filters
-│   │   ├── AnimeDetails.jsx  # Individual anime info page
-│   │   ├── Manga.jsx         # Top Manga browsing page
-│   │   ├── MangaDetails.jsx  # Individual manga info page
-│   │   ├── Movies.jsx        # Top Movies browsing page
-│   │   ├── Login.jsx         # Simulated login page
-│   │   ├── Search.jsx        # Full search results page
-│   │   └── Watchlist.jsx     # User's saved collections
+│   │   ├── Home.jsx          # Landing page with filters
+│   │   ├── AnimeDetails.jsx  # Single anime info
+│   │   ├── Manga.jsx         # Top Manga list
+│   │   ├── MangaDetails.jsx  # Single manga info
+│   │   ├── Movies.jsx        # Top Movies list
+│   │   ├── Login.jsx         # Simulated login
+│   │   ├── Search.jsx        # Search results grid
+│   │   └── Watchlist.jsx     # User collections dashboard
 │   ├── services/
-│   │   └── api.js            # Centralized Axios API configuration
-│   ├── App.jsx               # Main routing setup
-│   ├── main.jsx              # Entry point
-│   └── index.css             # Tailwind imports and global styles
+│   │   └── api.js            # Centralized Jikan API config
+│   ├── App.jsx               # Route definitions
+│   ├── main.jsx              # App entry point
+│   └── index.css             # Tailwind imports
 ├── index.html
 ├── package.json
 ├── tailwind.config.js
 └── vite.config.js
-🚀 Deployment
-This project is configured for deployment on Render.
+🚀 Deployment (Render)
+This project is optimized for deployment on Render.
+
+New Static Site: Connect your GitHub repo.
+
+Root Directory: client
 
 Build Command: npm install; npm run build
 
 Publish Directory: dist
 
-Root Directory: client (Important!)
+Note: If you encounter a "Route not found" error on refresh, you may need to add a rewrite rule in Render settings (Source: /* -> Destination: /index.html).
 
-⚠️ API Note
+⚠️ Disclaimer
 This project uses the free Jikan API.
 
-Rate Limits: The API has a rate limit. If you refresh too quickly, you might see a 429 error. Just wait a moment and try again.
+Rate Limits: You may experience a 429 error if you refresh too rapidly. This is a limitation of the free API tier.
 
-Stability: Occasionally the API may be down for maintenance.
+Data: All data is provided by MyAnimeList via Jikan.
 
 📝 License
-This project is for educational purposes. Data provided by MyAnimeList via Jikan API.
+This project is for educational purposes.
