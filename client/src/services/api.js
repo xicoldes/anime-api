@@ -16,7 +16,8 @@ export const api = {
         getRelations: (id) => axios.get(`${BASE}/anime/${id}/relations`), 
         
         search: (q, genreId = null, orderBy = null, sort = 'desc') => {
-            let url = `${BASE}/anime?q=${q}&sfw`;
+            let url = `${BASE}/anime?sfw`;
+            if (q) url += `&q=${q}`;
             if (genreId) url += `&genres=${genreId}`;
             if (orderBy) url += `&order_by=${orderBy}&sort=${sort}`;
             return axios.get(url);
@@ -24,10 +25,17 @@ export const api = {
         getGenres: () => axios.get(`${BASE}/genres/anime`),
     },
 
-    // --- MOVIES (FIXED) ---
-    // We use the /top/anime endpoint you found, but filter by type=movie
+    // --- MOVIES ---
     movies: {
         getTop: () => axios.get(`${BASE}/top/anime?type=movie&filter=bypopularity`),
+        
+        // NEW: Specific Search for Movies (Forces type=movie)
+        search: (genreId = null, orderBy = 'members') => {
+            let url = `${BASE}/anime?type=movie&sfw`;
+            if (genreId) url += `&genres=${genreId}`;
+            if (orderBy) url += `&order_by=${orderBy}&sort=desc`;
+            return axios.get(url);
+        }
     },
 
     // --- MANGA ---
@@ -38,7 +46,8 @@ export const api = {
         getRelations: (id) => axios.get(`${BASE}/manga/${id}/relations`),
         
         search: (q, genreId = null, orderBy = null, sort = 'desc') => {
-            let url = `${BASE}/manga?q=${q}&sfw`;
+            let url = `${BASE}/manga?sfw`;
+            if (q) url += `&q=${q}`;
             if (genreId) url += `&genres=${genreId}`;
             if (orderBy) url += `&order_by=${orderBy}&sort=${sort}`;
             return axios.get(url);
