@@ -2,8 +2,8 @@
 
 AnimeWiki is a modern, responsive React application serving as a comprehensive database for Anime, Manga, and Movies. Built with a focus on sleek UI/UX inspired by top streaming platforms, it utilizes the **Jikan API** (unofficial MyAnimeList API) to provide real-time data.
 
-![AnimeWiki Preview](https://via.placeholder.com/1000x500?text=AnimeWiki+Screenshot) 
-*(Replace this link with a real screenshot of your app later!)*
+<img width="1919" height="1057" alt="image" src="https://github.com/user-attachments/assets/edb9a99b-ceb2-4277-8316-52f379ca5166" />
+
 
 ## 🚀 Features
 
@@ -56,69 +56,85 @@ Follow these steps to run the project locally.
 
 ### **1. Clone the Repository**
 ```bash
-git clone [https://github.com/yourusername/animewiki.git](https://github.com/yourusername/animewiki.git)
+git clone https://github.com/xicoldes/animewiki.git
+
 cd animewiki
-2. Install Dependencies
+```
+### **2. Install Frontend Dependencies**
+
 Navigate to the client folder where the React app lives:
-
-Bash
-
+```bash
 cd client
-npm install
-3. Start the Development Server
-Bash
 
+npm install
+```
+### **3. Start the Development Server**
+```bash
 npm run dev
+```
 The app will launch at http://localhost:5173.
 
-📂 Project Structure
-Plaintext
 
-client/
-├── public/
-├── src/
-│   ├── components/
-│   │   ├── Hero.jsx          # Spotlight slider logic
-│   │   ├── Navbar.jsx        # Top nav with Live Search
-│   │   └── Trending.jsx      # Sidebar rankings
-│   ├── pages/
-│   │   ├── Home.jsx          # Landing page with filters
-│   │   ├── AnimeDetails.jsx  # Single anime info
-│   │   ├── Manga.jsx         # Top Manga list
-│   │   ├── MangaDetails.jsx  # Single manga info
-│   │   ├── Movies.jsx        # Top Movies list
-│   │   ├── Login.jsx         # Simulated login
-│   │   ├── Search.jsx        # Search results grid
-│   │   └── Watchlist.jsx     # User collections dashboard
-│   ├── services/
-│   │   └── api.js            # Centralized Jikan API config
-│   ├── App.jsx               # Route definitions
-│   ├── main.jsx              # App entry point
-│   └── index.css             # Tailwind imports
-├── index.html
-├── package.json
-├── tailwind.config.js
-└── vite.config.js
+## 📂 Project Structure
+```bash
+ANIME-API/
+├── client/                   # Frontend React Application
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/       # Reusable UI components
+│   │   │   ├── Hero.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   └── Trending.jsx
+│   │   ├── pages/            # Page components
+│   │   │   ├── AnimeDetails.jsx
+│   │   │   ├── Home.jsx
+│   │   │   ├── Login.jsx
+│   │   │   ├── Manga.jsx
+│   │   │   ├── MangaDetails.jsx
+│   │   │   ├── Movies.jsx
+│   │   │   ├── Search.jsx
+│   │   │   └── Watchlist.jsx
+│   │   ├── services/         # API handling
+│   │   │   └── api.js
+│   │   ├── App.css
+│   │   ├── App.jsx           # Main Frontend Route Setup
+│   │   ├── index.css         # Global Styles (Tailwind)
+│   │   └── main.jsx          # React Entry Point
+│   ├── index.html
+│   ├── package.json
+│   ├── tailwind.config.js
+│   └── vite.config.js
+├── controllers/              # Backend Logic
+│   └── animeController.js
+├── routes/                   # Backend Routes
+│   └── animeRoutes.js
+├── app.js                    # Backend Entry Point
+├── package.json              # Root Dependencies
+└── README.md                 # Project Documentation
+```
 
-🚀 Deployment (Render)
+
+## 🚀 Deployment (Render)
 This project is optimized for deployment on Render.
 
-New Static Site: Connect your GitHub repo.
+1. New Static Site: Connect your GitHub repo.
 
-Root Directory: client
+2. Root Directory: client
 
-Build Command: npm install; npm run build
+3. Build Command: npm install; npm run build
 
-Publish Directory: dist
+4. Publish Directory: dist
 
 Note: If you encounter a "Route not found" error on refresh, you may need to add a rewrite rule in Render settings (Source: /* -> Destination: /index.html).
 
-⚠️ Disclaimer
+
+## ⚠️ Disclaimer
 This project uses the free Jikan API.
 
-Rate Limits: You may experience a 429 error if you refresh too rapidly. This is a limitation of the free API tier.
+- Rate Limits: You may experience a 429 error if you refresh too rapidly. This is a limitation of the free API tier.
 
-Data: All data is provided by MyAnimeList via Jikan.
+- Data: All data is provided by MyAnimeList via Jikan.
 
-📝 License
+
+## 📝 License
 This project is for educational purposes.
