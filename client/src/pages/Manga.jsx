@@ -1,129 +1,137 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { api } from '../services/api';
 import { Link } from 'react-router-dom';
-import { FaFilter, FaStar, FaBookOpen, FaSortAmountDown } from 'react-icons/fa';
+import { FaStar, FaBookOpen, FaFilter, FaTimes, FaRedo } from 'react-icons/fa';
+
+// Same Allowed Genres List
+const ALLOWED_GENRES = [
+    'Action', 'Adventure', 'Cars', 'Comedy', 'Dementia', 'Demons', 'Drama', 
+    'Ecchi', 'Fantasy', 'Game', 'Harem', 'Historical', 'Horror', 'Isekai', 'Josei', 
+    'Kids', 'Magic', 'Martial Arts', 'Mecha', 'Military', 'Music', 'Mystery', 
+    'Parody', 'Police', 'Psychological', 'Romance', 'Samurai', 'School', 'Sci-Fi', 
+    'Seinen', 'Shoujo', 'Shoujo Ai', 'Shounen', 'Shounen Ai', 'Slice of Life', 
+    'Space', 'Sports', 'Super Power', 'Supernatural', 'Thriller', 'Vampire'
+];
 
 const Manga = () => {
-  const [mangaList, setMangaList] = useState([]); 
-  const [genres, setGenres] = useState([]);       
-  const [selectedGenre, setSelectedGenre] = useState(null);
-  const [filteredManga, setFilteredManga] = useState(null); 
-  const [showFilter, setShowFilter] = useState(false);
+  const [mangaList, setMangaList] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [loading, setLoading] = useState(true);
   
-  // Sort State
-  const [selectedSort, setSelectedSort] = useState('default');
+  const [selectedGenre, setSelectedGenre] = useState(null);
+  const [showFilter, setShowFilter] = useState(false);
+  const dataFetched = useRef(false);
 
   useEffect(() => {
-    api.manga.getTop().then(res => setMangaList(res.data.data));
-    api.manga.getGenres().then(res => setGenres(res.data.data));
+    if (dataFetched.current) return;
+    dataFetched.current = true;
+
+    const fetchInitialData = async () => {
+        try {
+            // 1. Get Top Manga
+            const res = await api.manga.getTop();
+            setMangaList(res.data.data);
+
+            // 2. Get Genres and Filter them
+            const genreRes = await api.manga.getGenres();
+            const safeGenres = genreRes.data.data
+                .filter(g => ALLOWED_GENRES.includes(g.name))
+                .sort((a, b) => a.name.localeCompare(b.name));
+            setGenres(safeGenres);
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchInitialData();
   }, []);
 
-  // Handle Genre Click
   const handleGenreClick = async (genreId) => {
-    setSelectedGenre(genreId);
-    performSearch(genreId, selectedSort);
-  };
-
-  // Handle Sort Change
-  const handleSortChange = (e) => {
-      const sortValue = e.target.value;
-      setSelectedSort(sortValue);
-      performSearch(selectedGenre, sortValue);
-  };
-
-  // Search Function
-  const performSearch = async (genreId, sortValue) => {
-      let orderBy = null;
-      let sort = 'desc'; 
-
-      // MAPPING: UI Options -> Jikan API Parameters
-      switch(sortValue) {
-          case 'score': orderBy = 'score'; break;
-          case 'popularity': orderBy = 'popularity'; break;
-          case 'title': orderBy = 'title'; sort = 'asc'; break;
-          case 'start_date': orderBy = 'start_date'; break;
-          case 'favorites': orderBy = 'favorites'; break;
-          case 'rank': orderBy = 'rank'; sort = 'asc'; break;
-          default: orderBy = null;
-      }
-
+      setLoading(true);
+      setSelectedGenre(genreId);
       try {
-          // If we have a sort OR a filter, we must use the Search endpoint
-          if (orderBy || genreId) {
-              const res = await api.manga.search('', genreId, orderBy, sort);
-              setFilteredManga(res.data.data);
-          } else {
-              // Reset to "Top Manga" if no filter/sort
-              setFilteredManga(null);
-          }
+          // Search Manga by Genre, sorted by Popularity (Members)
+          const res = await api.manga.search('', genreId, 'members');
+          setMangaList(res.data.data);
       } catch (err) {
           console.error(err);
+      } finally {
+          setLoading(false);
       }
   };
 
-  const clearFilter = () => {
+  const resetView = async () => {
+      setLoading(true);
       setSelectedGenre(null);
-      setSelectedSort('default');
-      setFilteredManga(null);
+      setShowFilter(false);
+      try {
+          const res = await api.manga.getTop();
+          setMangaList(res.data.data);
+      } catch (err) {
+          console.error(err);
+      } finally {
+          setLoading(false);
+      }
   };
 
-  const displayList = filteredManga || mangaList;
+  const getPageTitle = () => {
+      if (selectedGenre) {
+          const genreName = genres.find(g => g.mal_id === selectedGenre)?.name;
+          return `Top ${genreName} Manga`;
+      }
+      return 'Top Manga';
+  };
+
+  if (loading && !mangaList.length) return <div className="min-h-screen pt-32 text-center text-hianime-accent">Loading Manga...</div>;
 
   return (
-    <div className="pt-24 min-h-screen max-w-[1400px] mx-auto px-6">
+    <div className="pt-24 min-h-screen max-w-[1400px] mx-auto px-6 pb-20">
         
-        {/* Header Bar */}
+        {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <h2 className="text-3xl font-bold text-hianime-accent self-start md:self-auto">
-                {filteredManga ? "Results" : "Top Manga"}
-            </h2>
-            
-            <div className="flex gap-4 w-full md:w-auto">
-                {/* SORT DROPDOWN - FIXED CSS */}
-                <div className="relative flex items-center bg-hianime-sidebar px-3 py-2 rounded border border-white/10">
-                    <FaSortAmountDown className="text-gray-400 mr-2" />
-                    <select 
-                        value={selectedSort}
-                        onChange={handleSortChange}
-                        className="bg-transparent text-sm text-white outline-none cursor-pointer appearance-none pr-8"
-                    >
-                        {/* ADDED 'text-black' SO OPTIONS ARE VISIBLE */}
-                        <option value="default" className="text-black">Default</option>
-                        <option value="score" className="text-black">Highest Score</option>
-                        <option value="popularity" className="text-black">Most Popular</option>
-                        <option value="title" className="text-black">Name A-Z</option>
-                        <option value="start_date" className="text-black">Release Date</option>
-                        <option value="favorites" className="text-black">Most Favorites</option>
-                    </select>
-                </div>
-
-                <button 
-                    onClick={() => setShowFilter(!showFilter)} 
-                    className="flex items-center gap-2 bg-hianime-sidebar px-4 py-2 rounded text-sm hover:bg-hianime-accent hover:text-black transition border border-white/10"
-                >
-                    <FaFilter /> Filter
-                </button>
+            <div className="flex items-center gap-3 self-start md:self-auto">
+                <h1 className="text-2xl font-bold text-white border-l-4 border-hianime-accent pl-4 flex items-center gap-3">
+                    <FaBookOpen /> {getPageTitle()}
+                </h1>
+                
+                {/* Reset Button */}
+                {selectedGenre && (
+                    <button onClick={resetView} className="text-xs text-red-400 hover:text-white flex items-center gap-1 bg-black/20 px-2 py-1 rounded border border-white/5 transition">
+                        <FaRedo size={10} /> Reset
+                    </button>
+                )}
             </div>
+
+            {/* Filter Toggle */}
+            <button 
+                onClick={() => setShowFilter(!showFilter)} 
+                className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-bold transition ${
+                    showFilter 
+                    ? 'bg-hianime-accent text-black' 
+                    : 'bg-[#202225] text-white hover:bg-white/10'
+                }`}
+            >
+                {showFilter ? <><FaTimes /> Close</> : <><FaFilter /> Filter</>}
+            </button>
         </div>
 
-        {/* Filter Panel */}
+        {/* --- CLEAN GENRE PANEL --- */}
         {showFilter && (
-            <div className="bg-hianime-sidebar p-6 rounded-xl mb-8 border border-white/5 animate-fade-in">
+            <div className="bg-[#202225] p-6 rounded-xl mb-8 animate-fade-in border border-white/5">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-white font-bold">Select Genre</h3>
-                    {(selectedGenre || selectedSort !== 'default') && (
-                        <button onClick={clearFilter} className="text-xs text-red-400 hover:underline">Clear All</button>
-                    )}
+                    <h3 className="text-white font-bold text-sm">Genre</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                     {genres.map(genre => (
                         <button 
                             key={genre.mal_id}
                             onClick={() => handleGenreClick(genre.mal_id)}
-                            className={`px-3 py-1 rounded text-xs transition border border-white/5 ${
+                            className={`px-4 py-2 rounded-md text-sm transition border ${
                                 selectedGenre === genre.mal_id 
-                                ? 'bg-hianime-accent text-black font-bold' 
-                                : 'bg-black/40 text-gray-300 hover:bg-white/10'
+                                ? 'bg-hianime-accent text-black border-hianime-accent font-bold' 
+                                : 'bg-[#151719] text-gray-400 border-[#2a2c31] hover:text-white hover:border-gray-500'
                             }`}
                         >
                             {genre.name}
@@ -133,37 +141,39 @@ const Manga = () => {
             </div>
         )}
 
-        {/* Manga Grid */}
+        {/* --- MANGA GRID --- */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {displayList.map(manga => (
-                <Link to={`/manga/${manga.mal_id}`} key={manga.mal_id} className="group cursor-pointer">
+            {mangaList.map(item => (
+                <Link to={`/manga/${item.mal_id}`} key={item.mal_id} className="group cursor-pointer">
                     <div className="overflow-hidden rounded-lg aspect-[3/4] mb-3 relative">
                         <img 
-                            src={manga.images.jpg.large_image_url} 
-                            alt={manga.title} 
+                            src={item.images.jpg.large_image_url} 
+                            alt={item.title} 
                             className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
                         />
-                        {!filteredManga && (
-                            <div className="absolute top-2 left-2 bg-hianime-accent text-black text-[10px] font-bold px-2 py-0.5 rounded-sm">
-                                #{manga.rank}
-                            </div>
-                        )}
+                        <div className="absolute top-2 left-2 bg-white text-black text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase">
+                            {item.type}
+                        </div>
                         <div className="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                            <FaStar className="text-yellow-400 text-[8px]" /> {manga.score}
+                            <FaStar className="text-yellow-400 text-[8px]" /> {item.score}
                         </div>
                     </div>
                     
                     <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">
-                        {manga.title}
+                        {item.title}
                     </h3>
                     <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                        <span className="flex items-center gap-1"><FaBookOpen className="text-[10px]"/> {manga.volumes || '?'} Vols</span>
+                        <span>{item.status}</span>
                         <span>•</span>
-                        <span>{manga.type}</span>
+                        <span>{item.volumes || '?'} Vols</span>
                     </div>
                 </Link>
             ))}
         </div>
+        
+        {!loading && mangaList.length === 0 && (
+            <div className="text-center text-gray-500 py-20">No manga found.</div>
+        )}
     </div>
   );
 };

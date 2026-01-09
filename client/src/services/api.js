@@ -28,8 +28,6 @@ export const api = {
     // --- MOVIES ---
     movies: {
         getTop: () => axios.get(`${BASE}/top/anime?type=movie&filter=bypopularity`),
-        
-        // NEW: Specific Search for Movies (Forces type=movie)
         search: (genreId = null, orderBy = 'members') => {
             let url = `${BASE}/anime?type=movie&sfw`;
             if (genreId) url += `&genres=${genreId}`;
@@ -45,6 +43,7 @@ export const api = {
         getCharacters: (id) => axios.get(`${BASE}/manga/${id}/characters`),
         getRelations: (id) => axios.get(`${BASE}/manga/${id}/relations`),
         
+        // FIXED: Manga Search
         search: (q, genreId = null, orderBy = null, sort = 'desc') => {
             let url = `${BASE}/manga?sfw`;
             if (q) url += `&q=${q}`;

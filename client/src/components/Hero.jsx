@@ -120,10 +120,8 @@ const Hero = ({ animes }) => {
                     {anime.synopsis}
                 </p>
                 <div className="flex gap-3">
+                    {/* Watch Now Removed. Detail button updated to primary style. */}
                     <Link to={`/anime/${anime.mal_id}`} className="bg-hianime-accent text-black px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-white transition shadow-[0_0_15px_rgba(56,189,248,0.3)] text-sm">
-                        <FaPlayCircle /> Watch Now
-                    </Link>
-                    <Link to={`/anime/${anime.mal_id}`} className="bg-white/5 border border-white/10 text-white px-6 py-2.5 rounded-full font-bold hover:bg-white/10 transition backdrop-blur-sm text-sm">
                         Detail <span className="ml-1">›</span>
                     </Link>
                 </div>
@@ -148,7 +146,6 @@ const Hero = ({ animes }) => {
         </div>
 
         {/* Loading Bar (Left to Right) */}
-        {/* We use 'key' to force React to reset the animation when the slide changes */}
         <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
             <div 
                 key={currentIndex} 
@@ -160,7 +157,6 @@ const Hero = ({ animes }) => {
         </div>
     </div>
 
-    {/* Define Animation in JSX Style block (or add to tailwind config/css) */}
     <style>{`
         @keyframes progress {
             0% { width: 0%; }
