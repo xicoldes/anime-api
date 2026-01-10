@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { api } from '../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom'; // Added useSearchParams
 import { FaStar, FaBookOpen, FaFilter, FaTimes, FaRedo } from 'react-icons/fa';
 
 // Same Allowed Genres List
@@ -22,31 +22,50 @@ const Manga = () => {
   const [showFilter, setShowFilter] = useState(false);
   const dataFetched = useRef(false);
 
+  // FIX: Access Search Params to detect if we are coming from a link
+  const [searchParams] = useSearchParams();
+
   useEffect(() => {
     if (dataFetched.current) return;
     dataFetched.current = true;
 
     const fetchInitialData = async () => {
         try {
-            // 1. Get Top Manga
-            const res = await api.manga.getTop();
-            setMangaList(res.data.data);
-
-            // 2. Get Genres and Filter them
+            // 1. Get Genres and Filter them (Always needed)
             const genreRes = await api.manga.getGenres();
             const safeGenres = genreRes.data.data
                 .filter(g => ALLOWED_GENRES.includes(g.name))
                 .sort((a, b) => a.name.localeCompare(b.name));
             setGenres(safeGenres);
 
+            // 2. CHECK: Do we have a genre in the URL?
+            // If YES, skip fetching "Top Manga". The other useEffect will handle the search.
+            if (searchParams.get('genre')) return;
+
+            // 3. Get Top Manga (Only if NO filter)
+            const res = await api.manga.getTop();
+            setMangaList(res.data.data);
+
         } catch (err) {
             console.error(err);
         } finally {
-            setLoading(false);
+            // Only set loading false if we aren't waiting for the other effect
+            if (!searchParams.get('genre')) setLoading(false);
         }
     };
     fetchInitialData();
   }, []);
+
+  // Handle URL Params (This runs when ?genre=X exists)
+  useEffect(() => {
+      const genreParam = searchParams.get('genre');
+      if (genreParam) {
+          const genreId = parseInt(genreParam);
+          setSelectedGenre(genreId);
+          setShowFilter(true);
+          handleGenreClick(genreId);
+      }
+  }, [searchParams]);
 
   const handleGenreClick = async (genreId) => {
       setLoading(true);

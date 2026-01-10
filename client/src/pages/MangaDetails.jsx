@@ -3,24 +3,22 @@ import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { 
     FaBookOpen, FaStar, FaPlus, FaCheck, FaChevronUp, FaUserAlt, 
-    FaTrophy, FaHeart, FaUsers, FaHashtag, FaTv 
+    FaTrophy, FaHeart, FaUsers, FaHashtag, FaTv, FaSearch 
 } from 'react-icons/fa';
 
 const MangaDetails = () => {
   const { id } = useParams();
   const [manga, setManga] = useState(null);
-  const [characters, setCharacters] = useState([]); // State for Characters
+  const [characters, setCharacters] = useState([]);
   const [isAdded, setIsAdded] = useState(false);
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
 
-  // 1. Get current user
   const user = localStorage.getItem('user'); 
   const listKey = `mangalists_${user}`; 
 
   useEffect(() => {
     window.scrollTo(0, 0);
     
-    // Check Watchlist
     if (user) {
         const savedList = JSON.parse(localStorage.getItem(listKey)) || [];
         if (savedList.includes(id)) {
@@ -28,10 +26,8 @@ const MangaDetails = () => {
         }
     }
 
-    // Fetch Manga Details
     api.manga.getDetails(id).then(res => setManga(res.data.data));
     
-    // Fetch Characters (New)
     api.manga.getCharacters(id)
         .then(res => setCharacters(res.data.data))
         .catch(err => console.error(err));
@@ -43,7 +39,6 @@ const MangaDetails = () => {
           alert("Please login to add manga to your collection!");
           return;
       }
-
       let savedList = JSON.parse(localStorage.getItem(listKey)) || [];
       if (isAdded) {
           savedList = savedList.filter(itemId => itemId !== id);
@@ -60,18 +55,16 @@ const MangaDetails = () => {
   return (
     <div className="min-h-screen pb-20 bg-hianime-dark">
         
-        {/* --- HEADER BACKGROUND BLUR --- */}
+        {/* Header Background */}
         <div className="absolute top-0 w-full h-[400px] overflow-hidden z-0 opacity-20 mask-image-b">
              <img src={manga.images.jpg.large_image_url} className="w-full h-full object-cover blur-3xl" alt="" />
         </div>
 
-        {/* Main Content */}
         <div className="relative z-10 max-w-[1400px] mx-auto px-6 mt-24 flex flex-col lg:flex-row gap-12 animate-fade-in">
             
-            {/* Left Column (Main Info) */}
+            {/* Left Column */}
             <div className="flex-1">
                 <div className="flex flex-col md:flex-row gap-8 mb-8">
-                    {/* Cover Image */}
                     <img 
                         src={manga.images.jpg.large_image_url} 
                         className="w-64 h-96 object-cover rounded-lg shadow-2xl border-4 border-[#2a2c31] self-start" 
@@ -79,7 +72,6 @@ const MangaDetails = () => {
                     />
                     
                     <div className="pt-2 w-full">
-                        {/* Title Section */}
                         <div className="flex items-center gap-3 mb-2">
                             <span className="bg-white text-black px-2 py-0.5 rounded font-bold uppercase text-[10px] tracking-wider">
                                 {manga.type}
@@ -90,7 +82,7 @@ const MangaDetails = () => {
                         <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-2 leading-tight">{manga.title}</h1>
                         <p className="text-gray-400 text-sm font-medium mb-6">{manga.title_english || manga.title}</p>
 
-                        {/* STATS BAR */}
+                        {/* Stats Bar */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-[#202225]/80 backdrop-blur-md p-4 rounded-xl border border-white/5 mb-6">
                              <div className="flex flex-col">
                                 <span className="text-xs text-gray-400 uppercase font-bold">Score</span>
@@ -119,7 +111,7 @@ const MangaDetails = () => {
                              </div>
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* Buttons */}
                         <div className="flex gap-4 mb-8">
                             <button 
                                 onClick={handleAddToList}
@@ -146,7 +138,7 @@ const MangaDetails = () => {
                             </button>
                         </div>
 
-                        {/* Background Info */}
+                        {/* Background */}
                         {manga.background && (
                             <div className="mb-8">
                                 <h3 className="text-white font-bold text-lg mb-3 border-b border-white/10 pb-2">Background</h3>
@@ -154,7 +146,7 @@ const MangaDetails = () => {
                             </div>
                         )}
 
-                        {/* --- NEW: CHARACTERS SECTION --- */}
+                        {/* Characters */}
                         {characters.length > 0 && (
                             <div className="mb-8">
                                 <h3 className="text-white font-bold text-lg mb-4 border-b border-white/10 pb-2">Characters</h3>
@@ -180,7 +172,7 @@ const MangaDetails = () => {
                             </div>
                         )}
 
-                        {/* Related Entries */}
+                        {/* Relations */}
                         {manga.relations && manga.relations.length > 0 && (
                             <div className="mb-8">
                                 <h3 className="text-white font-bold text-lg mb-3 border-b border-white/10 pb-2">Related Entries</h3>
@@ -217,6 +209,7 @@ const MangaDetails = () => {
                     </h3>
 
                     <div className="space-y-3">
+                         {/* Basic Info */}
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="font-bold text-white">Japanese</span> 
                             <span className="text-gray-400 text-right">{manga.title_japanese}</span>
@@ -247,14 +240,20 @@ const MangaDetails = () => {
                         </div>
                     </div>
                     
-                    {/* Authors */}
+                    {/* Authors with Wiki Links */}
                     <div className="mt-6">
                         <span className="font-bold text-white block mb-2 text-xs uppercase opacity-70">Authors</span>
                         <div className="flex flex-wrap gap-2">
                             {manga.authors.map(author => (
-                                <span key={author.mal_id} className="text-hianime-accent text-xs flex items-center gap-1 bg-black/20 px-2 py-1 rounded">
-                                    <FaUserAlt className="text-[10px]"/> {author.name}
-                                </span>
+                                <a 
+                                    key={author.mal_id}
+                                    href={`https://www.google.com/search?q=${encodeURIComponent(author.name + ' wiki')}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-hianime-accent text-xs flex items-center gap-1 bg-black/20 px-2 py-1 rounded hover:bg-white/10 transition"
+                                >
+                                    <FaSearch className="text-[8px]"/> {author.name}
+                                </a>
                             ))}
                         </div>
                     </div>
