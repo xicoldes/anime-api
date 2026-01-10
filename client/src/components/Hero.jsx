@@ -76,15 +76,22 @@ const Hero = ({ animes }) => {
       
       {/* 1. IMAGE LAYER */}
       <div className="absolute top-0 right-0 w-full h-full md:w-[70%] z-0 pointer-events-none">
-        {/* Mobile Gradient (Bottom to Top) + Desktop Gradient (Right to Left) */}
+        
+        {/* Mobile Gradient (Bottom to Top) - Kept for mobile text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#202225] via-transparent to-transparent md:hidden z-10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#202225] via-[#202225]/60 to-transparent hidden md:block z-10" />
+        
+        {/* FIXED: Removed the desktop overlay gradient that caused the "dark patch" */}
         
         <img 
             key={anime.mal_id}
             src={bgImage} 
             alt={anime.title}
             className="w-full h-full object-cover md:object-contain md:object-right animate-fade-in"
+            // FIXED: Using Mask Image creates a clean fade without darkening the image
+            style={{
+                maskImage: 'linear-gradient(to right, transparent 0%, black 50%)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 50%)'
+            }}
         />
       </div>
 
@@ -106,12 +113,10 @@ const Hero = ({ animes }) => {
                     <span className="text-hianime-accent font-black">#{currentIndex + 1} Spotlight</span>
                 </div>
                 
-                {/* Title: Smaller on mobile to prevent overlap */}
                 <h1 className="text-xl md:text-4xl lg:text-5xl font-black text-white mb-2 md:mb-3 leading-tight tracking-tight drop-shadow-lg line-clamp-2">
                     {anime.title_english || anime.title}
                 </h1>
 
-                {/* Metadata */}
                 <div className="flex items-center gap-3 text-gray-300 text-[10px] md:text-xs mb-3 md:mb-4 font-medium">
                     <span className="flex items-center gap-1.5"><FaPlayCircle className="text-hianime-accent"/> {anime.type}</span>
                     <span className="flex items-center gap-1.5"><FaClock className="text-hianime-accent"/> {anime.duration}</span>
@@ -119,12 +124,10 @@ const Hero = ({ animes }) => {
                     <span className="bg-hianime-accent text-black px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">HD</span>
                 </div>
 
-                {/* Synopsis: Hidden on very small screens, visible on md+ */}
                 <p className="text-gray-400 line-clamp-2 md:line-clamp-3 text-xs md:text-sm mb-4 md:mb-6 leading-relaxed max-w-lg font-medium hidden sm:block">
                     {anime.synopsis}
                 </p>
                 
-                {/* BUTTONS SECTION - Side by Side on Mobile */}
                 <div className="flex flex-row gap-3">
                     <a 
                         href={`https://hianime.nz/search?keyword=${encodeURIComponent(anime.title_english || anime.title)}`}

@@ -1,7 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { api } from '../services/api';
 import { Link } from 'react-router-dom';
-import { FaPlayCircle, FaBookOpen, FaTrash, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { 
+    FaPlayCircle, FaBookOpen, FaTrash, 
+    FaChevronLeft, FaChevronRight, 
+    FaAngleDoubleLeft, FaAngleDoubleRight 
+} from 'react-icons/fa';
 
 const Watchlist = () => {
   const [animeList, setAnimeList] = useState([]);
@@ -24,7 +28,6 @@ const Watchlist = () => {
             // 1. Fetch Anime List
             const animeIds = JSON.parse(localStorage.getItem(`watchlist_${user}`)) || [];
             if (animeIds.length > 0) {
-                // Fetch all anime details in parallel
                 const animePromises = animeIds.map(id => api.anime.getFull(id).catch(e => null));
                 const animeResponses = await Promise.all(animePromises);
                 setAnimeList(animeResponses.filter(res => res !== null).map(res => res.data.data));
@@ -33,7 +36,6 @@ const Watchlist = () => {
             // 2. Fetch Manga List
             const mangaIds = JSON.parse(localStorage.getItem(`mangalists_${user}`)) || [];
             if (mangaIds.length > 0) {
-                // Fetch all manga details in parallel
                 const mangaPromises = mangaIds.map(id => api.manga.getDetails(id).catch(e => null));
                 const mangaResponses = await Promise.all(mangaPromises);
                 setMangaList(mangaResponses.filter(res => res !== null).map(res => res.data.data));
@@ -62,12 +64,18 @@ const Watchlist = () => {
       }
   };
 
-  // Scroll Handler
+  // UPDATED: Scroll Handler with Start/End Logic
   const scroll = (ref, direction) => {
       if (ref.current) {
           const { current } = ref;
-          const scrollAmount = direction === 'left' ? -500 : 500;
-          current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+          if (direction === 'start') {
+              current.scrollTo({ left: 0, behavior: 'smooth' });
+          } else if (direction === 'end') {
+              current.scrollTo({ left: current.scrollWidth, behavior: 'smooth' });
+          } else {
+              const scrollAmount = direction === 'left' ? -500 : 500;
+              current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+          }
       }
   };
 
@@ -90,11 +98,14 @@ const Watchlist = () => {
                 <h2 className="text-2xl font-bold text-hianime-accent flex items-center gap-2">
                     <FaPlayCircle /> Anime Watchlist <span className="text-xs text-gray-500 bg-white/10 px-2 py-0.5 rounded-full ml-2">{animeList.length}</span>
                 </h2>
-                {/* Scroll Arrows */}
+                
+                {/* Scroll Buttons */}
                 {animeList.length > 5 && (
                     <div className="flex gap-2">
-                        <button onClick={() => scroll(animeScrollRef, 'left')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10"><FaChevronLeft /></button>
-                        <button onClick={() => scroll(animeScrollRef, 'right')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10"><FaChevronRight /></button>
+                        <button onClick={() => scroll(animeScrollRef, 'start')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10" title="Jump to Start"><FaAngleDoubleLeft /></button>
+                        <button onClick={() => scroll(animeScrollRef, 'left')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10" title="Scroll Left"><FaChevronLeft /></button>
+                        <button onClick={() => scroll(animeScrollRef, 'right')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10" title="Scroll Right"><FaChevronRight /></button>
+                        <button onClick={() => scroll(animeScrollRef, 'end')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10" title="Jump to End"><FaAngleDoubleRight /></button>
                     </div>
                 )}
             </div>
@@ -113,7 +124,9 @@ const Watchlist = () => {
                                         {anime.type}
                                     </div>
                                 </div>
-                                <h3 className="text-white font-bold text-sm truncate group-hover:text-hianime-accent transition">{anime.title}</h3>
+                                <h3 className="text-white font-bold text-sm truncate group-hover:text-hianime-accent transition">
+                                    {anime.title_english || anime.title}
+                                </h3>
                                 <p className="text-gray-500 text-xs">{anime.episodes || '?'} Eps</p>
                             </Link>
                             <button 
@@ -137,11 +150,14 @@ const Watchlist = () => {
                 <h2 className="text-2xl font-bold text-hianime-accent flex items-center gap-2">
                     <FaBookOpen /> Manga Collection <span className="text-xs text-gray-500 bg-white/10 px-2 py-0.5 rounded-full ml-2">{mangaList.length}</span>
                 </h2>
-                {/* Scroll Arrows */}
+                
+                {/* Scroll Buttons */}
                 {mangaList.length > 5 && (
                     <div className="flex gap-2">
-                        <button onClick={() => scroll(mangaScrollRef, 'left')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10"><FaChevronLeft /></button>
-                        <button onClick={() => scroll(mangaScrollRef, 'right')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10"><FaChevronRight /></button>
+                        <button onClick={() => scroll(mangaScrollRef, 'start')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10" title="Jump to Start"><FaAngleDoubleLeft /></button>
+                        <button onClick={() => scroll(mangaScrollRef, 'left')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10" title="Scroll Left"><FaChevronLeft /></button>
+                        <button onClick={() => scroll(mangaScrollRef, 'right')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10" title="Scroll Right"><FaChevronRight /></button>
+                        <button onClick={() => scroll(mangaScrollRef, 'end')} className="p-2 rounded-full bg-hianime-sidebar hover:bg-hianime-accent hover:text-black transition border border-white/10" title="Jump to End"><FaAngleDoubleRight /></button>
                     </div>
                 )}
             </div>
@@ -160,7 +176,9 @@ const Watchlist = () => {
                                         {manga.type}
                                     </div>
                                 </div>
-                                <h3 className="text-white font-bold text-sm truncate group-hover:text-hianime-accent transition">{manga.title}</h3>
+                                <h3 className="text-white font-bold text-sm truncate group-hover:text-hianime-accent transition">
+                                    {manga.title_english || manga.title}
+                                </h3>
                                 <p className="text-gray-500 text-xs">{manga.volumes || '?'} Vols</p>
                             </Link>
                             <button 
