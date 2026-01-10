@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FaPlayCircle, FaCalendarAlt, FaClock, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaPlayCircle, FaCalendarAlt, FaClock, FaChevronLeft, FaChevronRight, FaPlay } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 const Hero = ({ animes }) => {
@@ -73,7 +73,7 @@ const Hero = ({ animes }) => {
         onMouseDown={onTouchStart}
         onMouseMove={onTouchMove}
         onMouseUp={onTouchEnd}
-        onMouseLeave={() => setIsDragging(false)} // Stop drag if mouse leaves area
+        onMouseLeave={() => setIsDragging(false)}
     >
       
       {/* 1. IMAGE LAYER */}
@@ -90,7 +90,7 @@ const Hero = ({ animes }) => {
         />
       </div>
 
-      {/* Navigation Arrows (Hidden on mobile, visible on hover) */}
+      {/* Navigation Arrows */}
       <div className="hidden md:block opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button onClick={(e) => { e.stopPropagation(); prevSlide(); }} className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-white/5 border border-white/10 p-2 rounded-full text-white hover:bg-hianime-accent hover:text-black transition backdrop-blur-md">
             <FaChevronLeft size={14} />
@@ -107,7 +107,6 @@ const Hero = ({ animes }) => {
                 <div className="text-hianime-accent font-bold mb-2 tracking-widest text-[10px] md:text-xs uppercase flex items-center gap-2">
                     <span className="text-hianime-accent font-black">#{currentIndex + 1} Spotlight</span>
                 </div>
-                {/* ENGLISH TITLE CHANGE HERE */}
                 <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-white mb-3 leading-tight tracking-tight drop-shadow-lg line-clamp-2">
                     {anime.title_english || anime.title}
                 </h1>
@@ -120,8 +119,20 @@ const Hero = ({ animes }) => {
                 <p className="text-gray-400 line-clamp-3 text-xs md:text-sm mb-6 leading-relaxed max-w-lg font-medium">
                     {anime.synopsis}
                 </p>
+                
+                {/* BUTTONS SECTION */}
                 <div className="flex gap-3">
-                    <Link to={`/anime/${anime.mal_id}`} className="bg-hianime-accent text-black px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-white transition shadow-[0_0_15px_rgba(56,189,248,0.3)] text-sm">
+                    {/* WATCH NOW BUTTON */}
+                    <a 
+                        href={`https://hianime.nz/search?keyword=${encodeURIComponent(anime.title_english || anime.title)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-hianime-accent text-black px-8 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-white hover:scale-105 transition shadow-[0_0_15px_rgba(56,189,248,0.3)] text-sm"
+                    >
+                        <FaPlay /> Watch Now
+                    </a>
+
+                    <Link to={`/anime/${anime.mal_id}`} className="bg-white/10 text-white border border-white/20 px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-white hover:text-black transition text-sm backdrop-blur-md">
                         Detail <span className="ml-1">›</span>
                     </Link>
                 </div>
@@ -131,8 +142,6 @@ const Hero = ({ animes }) => {
 
     {/* 3. PROGRESS BAR & DOTS */}
     <div className="absolute bottom-4 left-0 right-0 z-30 flex flex-col items-center gap-3 pointer-events-auto">
-        
-        {/* Navigation Dots */}
         <div className="flex gap-2">
             {animes.map((_, idx) => (
                 <button 
@@ -144,25 +153,16 @@ const Hero = ({ animes }) => {
                 />
             ))}
         </div>
-
-        {/* Loading Bar (Left to Right) */}
         <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
             <div 
                 key={currentIndex} 
                 className="h-full bg-hianime-accent/50"
-                style={{
-                    animation: 'progress 6s linear forwards'
-                }}
+                style={{ animation: 'progress 6s linear forwards' }}
             ></div>
         </div>
     </div>
 
-    <style>{`
-        @keyframes progress {
-            0% { width: 0%; }
-            100% { width: 100%; }
-        }
-    `}</style>
+    <style>{`@keyframes progress { 0% { width: 0%; } 100% { width: 100%; } }`}</style>
     </div>
   );
 };
