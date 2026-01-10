@@ -122,7 +122,6 @@ const Hero = ({ animes }) => {
                 
                 {/* BUTTONS SECTION */}
                 <div className="flex gap-3">
-                    {/* WATCH NOW BUTTON */}
                     <a 
                         href={`https://hianime.nz/search?keyword=${encodeURIComponent(anime.title_english || anime.title)}`}
                         target="_blank"
@@ -140,20 +139,22 @@ const Hero = ({ animes }) => {
         </div>
     </div>
 
-    {/* 3. PROGRESS BAR & DOTS */}
-    <div className="absolute bottom-4 left-0 right-0 z-30 flex flex-col items-center gap-3 pointer-events-auto">
-        <div className="flex gap-2">
+    {/* 3. PROGRESS BAR & DOTS (UPDATED SIZE) */}
+    <div className="absolute bottom-6 left-0 right-0 z-30 flex flex-col items-center gap-4 pointer-events-auto">
+        <div className="flex gap-3">
             {animes.map((_, idx) => (
                 <button 
                     key={idx}
                     onClick={(e) => { e.stopPropagation(); goToSlide(idx); }}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        idx === currentIndex ? 'bg-hianime-accent w-6' : 'bg-white/20 hover:bg-white'
+                    className={`h-4 rounded-full transition-all duration-300 cursor-pointer shadow-sm ${
+                        idx === currentIndex 
+                        ? 'bg-hianime-accent w-12'  // Active: Wider pill
+                        : 'bg-white/30 w-4 hover:bg-white' // Inactive: Bigger circle
                     }`}
                 />
             ))}
         </div>
-        <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
+        <div className="w-64 h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div 
                 key={currentIndex} 
                 className="h-full bg-hianime-accent/50"

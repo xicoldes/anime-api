@@ -37,11 +37,14 @@ const Home = () => {
 
     const fetchData = async () => {
         try {
+            // Spotlight (Hero)
             const spotlightData = await api.anime.getSpotlight();
             setSpotlight(spotlightData);
             
-            const trendingData = await api.top.getAnime();
-            setTrending(trendingData.data.data);
+            // NEW: Trending Sidebar (Uses specific Trending API now)
+            const trendingData = await api.anime.getTrending();
+            setTrending(trendingData); // Pass the data array directly
+            
         } catch (err) { console.error("Initial Load Error", err); }
 
         setTimeout(async () => {
@@ -56,7 +59,6 @@ const Home = () => {
                 const movieData = await api.movies.getTop();
                 setMovies(movieData.data.data);
                 
-                // --- STRICT GENRE FILTERING ---
                 const genreData = await api.anime.getGenres();
                 const safeGenres = genreData.data.data
                     .filter(g => ALLOWED_GENRES.includes(g.name))
@@ -90,8 +92,6 @@ const Home = () => {
 
   const performSearch = async (genreId) => {
     try {
-        // FIX: Changed 'popularity' to 'members'. 
-        // 'members' sorts by Viewer Count (High to Low), which is the true "Most Popular".
         const res = await api.anime.search('', genreId, 'members');
         setFilteredAnimes(res.data.data);
     } catch (err) {
@@ -133,8 +133,7 @@ const Home = () => {
                     <h2 className="text-xl font-bold text-hianime-accent">
                         {getSectionTitle()}
                     </h2>
-                    {/* Reset Button */}
-                    {(filteredAnimes) && (
+                    {filteredAnimes && (
                         <button onClick={resetView} className="text-xs text-red-400 hover:text-white flex items-center gap-1 bg-black/20 px-2 py-1 rounded border border-white/5 transition">
                             <FaRedo size={10} /> Reset
                         </button>
@@ -142,7 +141,6 @@ const Home = () => {
                 </div>
                 
                 <div className="flex gap-4 w-full md:w-auto">
-                    {/* Filter Toggle */}
                     <button 
                         onClick={() => setShowFilter(!showFilter)} 
                         className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-bold transition ${
@@ -194,7 +192,6 @@ const Home = () => {
                                 <span className="text-xs text-gray-300">{anime.type} • {anime.year || 'N/A'}</span>
                             </div>
                         </div>
-                        {/* ENGLISH TITLE CHANGE HERE */}
                         <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">
                             {anime.title_english || anime.title}
                         </h3>
@@ -221,7 +218,6 @@ const Home = () => {
                                     <img src={movie.images.jpg.large_image_url} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                                     <div className="absolute top-2 left-2 bg-hianime-accent text-black text-[10px] font-bold px-1.5 py-0.5 rounded-sm">MOVIE</div>
                                 </div>
-                                {/* ENGLISH TITLE CHANGE HERE */}
                                 <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">
                                     {movie.title_english || movie.title}
                                 </h3>

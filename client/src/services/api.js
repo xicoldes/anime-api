@@ -9,13 +9,17 @@ export const api = {
              const { data } = await axios.get(`${BASE}/seasons/now?filter=tv&sfw&limit=10`);
              return data.data; 
         },
+        // NEW: Fetch Current Season sorted by Popularity (Members)
+        getTrending: async () => {
+             const { data } = await axios.get(`${BASE}/seasons/now?filter=tv&sfw&order_by=members&sort=desc&limit=10`);
+             return data.data; 
+        },
         getFull: (id) => axios.get(`${BASE}/anime/${id}/full`),
         getCharacters: (id) => axios.get(`${BASE}/anime/${id}/characters`),
         getStaff: (id) => axios.get(`${BASE}/anime/${id}/staff`),
         getEpisodes: (id) => axios.get(`${BASE}/anime/${id}/episodes`),
         getRelations: (id) => axios.get(`${BASE}/anime/${id}/relations`), 
         
-        // Updated to accept page
         search: (q, genreId = null, orderBy = null, page = 1) => {
             let url = `${BASE}/anime?sfw&page=${page}`;
             if (q) url += `&q=${q}`;
@@ -29,7 +33,6 @@ export const api = {
     // --- MOVIES ---
     movies: {
         getTop: () => axios.get(`${BASE}/top/anime?type=movie&filter=bypopularity`),
-        // Updated to accept page
         search: (genreId = null, orderBy = 'members', page = 1) => {
             let url = `${BASE}/anime?type=movie&sfw&page=${page}`;
             if (genreId) url += `&genres=${genreId}`;
@@ -40,12 +43,11 @@ export const api = {
 
     // --- MANGA ---
     manga: {
-        getTop: () => axios.get(`${BASE}/top/manga`),
+        getTop: () => axios.get(`${BASE}/top/manga?filter=bypopularity`), // Updated to popularity
         getDetails: (id) => axios.get(`${BASE}/manga/${id}/full`),
         getCharacters: (id) => axios.get(`${BASE}/manga/${id}/characters`),
         getRelations: (id) => axios.get(`${BASE}/manga/${id}/relations`),
         
-        // Updated to accept page
         search: (q, genreId = null, orderBy = null, page = 1) => {
             let url = `${BASE}/manga?sfw&page=${page}`;
             if (q) url += `&q=${q}`;
@@ -58,7 +60,7 @@ export const api = {
 
     // --- TOP / TRENDING ---
     top: {
-        getAnime: () => axios.get(`${BASE}/top/anime?filter=airing`),
+        getAnime: () => axios.get(`${BASE}/top/anime?filter=bypopularity`), // Fallback popular list
         getCharacters: () => axios.get(`${BASE}/top/characters`),
     },
 
