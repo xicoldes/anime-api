@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { 
     FaBookOpen, FaStar, FaPlus, FaCheck, FaChevronUp, FaUserAlt, 
-    FaTrophy, FaHeart, FaUsers, FaHashtag, FaTv, FaSearch 
+    FaTrophy, FaHeart, FaUsers, FaHashtag, FaTv, FaSearch, FaExternalLinkAlt 
 } from 'react-icons/fa';
 
 const MangaDetails = () => {
@@ -111,16 +111,27 @@ const MangaDetails = () => {
                              </div>
                         </div>
 
-                        {/* Buttons */}
-                        <div className="flex gap-4 mb-8">
+                        {/* Buttons Row */}
+                        <div className="flex flex-wrap gap-4 mb-8">
+                            {/* 1. READ NOW BUTTON (New) */}
+                            <a 
+                                href={`https://mangakatana.com/?search=${encodeURIComponent(manga.title)}&search_by=book_name`}
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="px-8 py-3 rounded-full font-bold flex items-center gap-2 transition bg-hianime-accent text-black hover:bg-white hover:scale-105 shadow-[0_0_15px_rgba(255,186,222,0.3)]"
+                            >
+                                <FaBookOpen /> Read Now
+                            </a>
+
+                            {/* 2. Add to Collection Button */}
                             <button 
                                 onClick={handleAddToList}
                                 className={`px-8 py-3 rounded-full font-bold flex items-center gap-2 transition border border-white/10 ${
-                                    isAdded ? "bg-green-500 text-black hover:bg-green-400" : "bg-hianime-sidebar text-white hover:bg-hianime-accent hover:text-black"
+                                    isAdded ? "bg-green-500 text-black hover:bg-green-400" : "bg-hianime-sidebar text-white hover:bg-white/10"
                                 }`}
                             >
                                 {isAdded ? <FaCheck /> : <FaPlus />} 
-                                {isAdded ? "Added to Collection" : "Add to Collection"}
+                                {isAdded ? "Added" : "Add to List"}
                             </button>
                         </div>
 
