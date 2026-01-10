@@ -1,9 +1,16 @@
-# AnimeWiki 🎥
+# 🍙 AnimeWiki - Ultimate Anime Discovery Platform
 
-AnimeWiki is a modern, responsive React application serving as a comprehensive database for Anime, Manga, and Movies. Built with a focus on sleek UI/UX inspired by top streaming platforms, it utilizes the **Jikan API** (unofficial MyAnimeList API) to provide real-time data.
+<img width="1919" height="1056" alt="image" src="https://github.com/user-attachments/assets/7f8ad470-7c99-4638-bd4e-6879e34dc933" />
 
-<img width="1919" height="1057" alt="Screenshot 2026-01-09 033559" src="https://github.com/user-attachments/assets/6ae4281f-1dc9-4f25-a164-923c91deddb5" />
 
+> A modern, responsive, and feature-rich anime discovery web application powered by the **Jikan API (MyAnimeList)**. Built with React and Tailwind CSS.
+
+---
+
+## 🔗 **Live Demo**
+### 🚀 **[Click here to view the Live Site](https://https-github-com-xicoldes-anime-api.onrender.com/)**
+
+---
 
 ## 🚀 Features
 
@@ -16,25 +23,27 @@ AnimeWiki is a modern, responsive React application serving as a comprehensive d
 * **Trending Sidebar:** A quick-look vertical list of top-ranked series.
 * **Smart Filtering:** Filter content by **Genre** or sort by **Popularity, Score, Name, Date, etc.**
 
-### **2. 🔍 Advanced Search**
-* **Live Search Bar:** A smart dropdown that instantly shows results with thumbnails as you type.
-    * *Context Aware:* Automatically switches between searching **Anime** or **Manga** based on the current page.
-* **Dedicated Search Page:** A full results grid for deep diving into specific queries.
+### **2. 📚 Manga Database**
+* **Extensive Library:** Browse thousands of manga titles.
+* **Advanced Deduplication:** Ensures unique entries for cleaner browsing.
+* **Pagination:** Smooth page navigation (Next/Prev/Numbered) to browse large collections.
+* **Read Now Integration:** Direct "Read Now" button links to external reading sources (MangaKatana) dynamically based on the title.
 
-### **3. 📚 Content Databases**
-* **Movies Page:** A standalone page ranking the top Anime Movies of all time.
-* **Manga Page:** A dedicated section for browsing top-rated Manga.
-* **Detailed Info:**
-    * **Anime:** Synopsis, score, rank, trailer, characters, voice actors, and relations.
-    * **Manga:** Authors, volumes, published dates, and genres.
-    * **External Links:** Clickable studios and authors redirect to Google searches.
+### **3. 🔍 Advanced Search**
+* **Real-time Results:** Search for Anime or Manga with instant feedback.
+* **Smart Detection:** Automatically detects if searching for Anime or Manga based on the active page.
+* **Deep Linking:** Shareable search URLs (e.g., `/search?q=naruto`).
 
-### **4. 👤 User Features (Simulated)**
-* **Login System:** A lightweight, frontend-only authentication system using LocalStorage.
-* **My Collections:**
-    * **Watchlist:** Save your favorite Anime.
-    * **Manga Collection:** Save Manga you are reading.
-    * *Note:* "Add to List" buttons are protected and require login.
+### **4. 📄 Detailed Info Pages**
+* **Rich Metadata:** Displays Score, Rank, Popularity, Members, and Synopsis.
+* **Character Grid:** Shows main and supporting characters with images.
+* **Related Entries:** Links to prequels, sequels, and side stories.
+* **Author Wiki:** Quick links to search authors on Google/Wiki.
+
+### **5. ❤️ User Collections (Watchlist)**
+* **Local Storage Auth:** Simple login simulation (no backend required).
+* **Bookmark System:** Add or remove Anime/Manga to your personal collection.
+* **Persistent State:** Remembers your list even after refreshing.
 
 ---
 
@@ -42,23 +51,19 @@ AnimeWiki is a modern, responsive React application serving as a comprehensive d
 
 * **Frontend:** React.js (Vite)
 * **Styling:** Tailwind CSS
-* **Routing:** React Router DOM (v6)
+* **API:** Jikan API v4 (Unofficial MyAnimeList API)
+* **Routing:** React Router DOM
 * **Icons:** React Icons (FontAwesome)
-* **Data Fetching:** Axios
-* **API:** [Jikan API v4](https://jikan.moe/)
 * **Deployment:** Render
 
 ---
 
 ## 📦 Installation & Setup
 
-Follow these steps to run the project locally.
-
-### **1. Clone the Repository**
+1. **Clone the repository**
 ```bash
-git clone https://github.com/xicoldes/animewiki.git
-
-cd animewiki
+   git clone [https://github.com/your-username/animewiki.git](https://github.com/your-username/animewiki.git)
+   cd animewiki
 ```
 ### **2. Install Frontend Dependencies**
 
