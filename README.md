@@ -1,6 +1,7 @@
 # 🍙 AnimeWiki - Ultimate Anime Discovery Platform
 
-<img width="1919" height="1056" alt="image" src="https://github.com/user-attachments/assets/182116d0-3a21-4184-b901-1dbcf3850055" />
+<img width="1919" height="1056" alt="image" src="https://github.com/user-attachments/assets/58948486-7493-4eba-8723-a98ebb2e0216" />
+
 
 
 
