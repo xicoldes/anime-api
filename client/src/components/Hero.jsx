@@ -8,7 +8,6 @@ const Hero = ({ animes }) => {
   const [touchEnd, setTouchEnd] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Auto-slide logic
   useEffect(() => {
     const interval = setInterval(() => {
       nextSlide();
@@ -36,7 +35,6 @@ const Hero = ({ animes }) => {
       setCurrentIndex(index);
   };
 
-  // --- SWIPE / DRAG LOGIC ---
   const minSwipeDistance = 50; 
 
   const onTouchStart = (e) => {
@@ -66,7 +64,7 @@ const Hero = ({ animes }) => {
 
   return (
     <div 
-        className="relative h-[45vh] md:h-[55vh] w-full mt-16 bg-hianime-dark overflow-hidden group select-none cursor-grab active:cursor-grabbing"
+        className="relative h-[50vh] md:h-[55vh] w-full mt-16 bg-hianime-dark overflow-hidden group select-none cursor-grab active:cursor-grabbing"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -77,16 +75,16 @@ const Hero = ({ animes }) => {
     >
       
       {/* 1. IMAGE LAYER */}
-      <div className="absolute top-0 right-0 w-full md:w-[70%] h-full z-0 pointer-events-none">
+      <div className="absolute top-0 right-0 w-full h-full md:w-[70%] z-0 pointer-events-none">
+        {/* Mobile Gradient (Bottom to Top) + Desktop Gradient (Right to Left) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#202225] via-transparent to-transparent md:hidden z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#202225] via-[#202225]/60 to-transparent hidden md:block z-10" />
+        
         <img 
             key={anime.mal_id}
             src={bgImage} 
             alt={anime.title}
-            className="w-full h-full object-contain object-right animate-fade-in"
-            style={{
-                maskImage: 'linear-gradient(to right, transparent 0%, black 20%)',
-                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 20%)'
-            }}
+            className="w-full h-full object-cover md:object-contain md:object-right animate-fade-in"
         />
       </div>
 
@@ -101,37 +99,46 @@ const Hero = ({ animes }) => {
       </div>
 
       {/* 2. CONTENT LAYER */}
-      <div className="absolute top-0 left-0 w-full h-full z-10 flex items-center pointer-events-none">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 w-full">
+      <div className="absolute top-0 left-0 w-full h-full z-20 flex items-end md:items-center pb-12 md:pb-0 pointer-events-none">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-12 w-full">
             <div className="w-full md:w-[50%] animate-slide-up pointer-events-auto">
                 <div className="text-hianime-accent font-bold mb-2 tracking-widest text-[10px] md:text-xs uppercase flex items-center gap-2">
                     <span className="text-hianime-accent font-black">#{currentIndex + 1} Spotlight</span>
                 </div>
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-white mb-3 leading-tight tracking-tight drop-shadow-lg line-clamp-2">
+                
+                {/* Title: Smaller on mobile to prevent overlap */}
+                <h1 className="text-xl md:text-4xl lg:text-5xl font-black text-white mb-2 md:mb-3 leading-tight tracking-tight drop-shadow-lg line-clamp-2">
                     {anime.title_english || anime.title}
                 </h1>
-                <div className="flex items-center gap-3 text-gray-300 text-[10px] md:text-xs mb-4 font-medium">
+
+                {/* Metadata */}
+                <div className="flex items-center gap-3 text-gray-300 text-[10px] md:text-xs mb-3 md:mb-4 font-medium">
                     <span className="flex items-center gap-1.5"><FaPlayCircle className="text-hianime-accent"/> {anime.type}</span>
                     <span className="flex items-center gap-1.5"><FaClock className="text-hianime-accent"/> {anime.duration}</span>
                     <span className="flex items-center gap-1.5"><FaCalendarAlt className="text-hianime-accent"/> {anime.year || '2024'}</span>
                     <span className="bg-hianime-accent text-black px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">HD</span>
                 </div>
-                <p className="text-gray-400 line-clamp-3 text-xs md:text-sm mb-6 leading-relaxed max-w-lg font-medium">
+
+                {/* Synopsis: Hidden on very small screens, visible on md+ */}
+                <p className="text-gray-400 line-clamp-2 md:line-clamp-3 text-xs md:text-sm mb-4 md:mb-6 leading-relaxed max-w-lg font-medium hidden sm:block">
                     {anime.synopsis}
                 </p>
                 
-                {/* BUTTONS SECTION */}
-                <div className="flex gap-3">
+                {/* BUTTONS SECTION - Side by Side on Mobile */}
+                <div className="flex flex-row gap-3">
                     <a 
                         href={`https://hianime.nz/search?keyword=${encodeURIComponent(anime.title_english || anime.title)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-hianime-accent text-black px-8 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-white hover:scale-105 transition shadow-[0_0_15px_rgba(56,189,248,0.3)] text-sm"
+                        className="bg-hianime-accent text-black px-6 py-2 md:px-8 md:py-2.5 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-white hover:scale-105 transition shadow-[0_0_15px_rgba(56,189,248,0.3)] text-xs md:text-sm w-auto"
                     >
                         <FaPlay /> Watch Now
                     </a>
 
-                    <Link to={`/anime/${anime.mal_id}`} className="bg-white/10 text-white border border-white/20 px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-white hover:text-black transition text-sm backdrop-blur-md">
+                    <Link 
+                        to={`/anime/${anime.mal_id}`} 
+                        className="bg-white/10 text-white border border-white/20 px-6 py-2 md:px-6 md:py-2.5 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-white hover:text-black transition text-xs md:text-sm backdrop-blur-md w-auto"
+                    >
                         Detail <span className="ml-1">›</span>
                     </Link>
                 </div>
@@ -139,31 +146,22 @@ const Hero = ({ animes }) => {
         </div>
     </div>
 
-    {/* 3. PROGRESS BAR & DOTS (UPDATED SIZE) */}
-    <div className="absolute bottom-6 left-0 right-0 z-30 flex flex-col items-center gap-4 pointer-events-auto">
-        <div className="flex gap-3">
+    {/* 3. PROGRESS BAR & DOTS */}
+    <div className="absolute bottom-3 md:bottom-6 left-0 right-0 z-30 flex flex-col items-center gap-4 pointer-events-auto">
+        <div className="flex gap-2 md:gap-3">
             {animes.map((_, idx) => (
                 <button 
                     key={idx}
                     onClick={(e) => { e.stopPropagation(); goToSlide(idx); }}
-                    className={`h-4 rounded-full transition-all duration-300 cursor-pointer shadow-sm ${
+                    className={`h-1.5 md:h-2 rounded-full transition-all duration-300 cursor-pointer shadow-sm ${
                         idx === currentIndex 
-                        ? 'bg-hianime-accent w-12'  // Active: Wider pill
-                        : 'bg-white/30 w-4 hover:bg-white' // Inactive: Bigger circle
+                        ? 'bg-hianime-accent w-6 md:w-8'  
+                        : 'bg-white/30 w-1.5 md:w-2 hover:bg-white'
                     }`}
                 />
             ))}
         </div>
-        <div className="w-64 h-1.5 bg-white/10 rounded-full overflow-hidden">
-            <div 
-                key={currentIndex} 
-                className="h-full bg-hianime-accent/50"
-                style={{ animation: 'progress 6s linear forwards' }}
-            ></div>
-        </div>
     </div>
-
-    <style>{`@keyframes progress { 0% { width: 0%; } 100% { width: 100%; } }`}</style>
     </div>
   );
 };
