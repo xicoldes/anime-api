@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { api } from '../services/api';
-import { Link, useSearchParams } from 'react-router-dom'; // Added useSearchParams
+import { Link, useSearchParams } from 'react-router-dom'; 
 import { FaStar, FaBookOpen, FaFilter, FaTimes, FaRedo } from 'react-icons/fa';
 
 // Same Allowed Genres List
@@ -22,7 +22,7 @@ const Manga = () => {
   const [showFilter, setShowFilter] = useState(false);
   const dataFetched = useRef(false);
 
-  // FIX: Access Search Params to detect if we are coming from a link
+  // Access Search Params
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -31,12 +31,24 @@ const Manga = () => {
 
     const fetchInitialData = async () => {
         try {
-            // 1. Get Genres and Filter them (Always needed)
+            // 1. Get Genres
             const genreRes = await api.manga.getGenres();
-            const safeGenres = genreRes.data.data
-                .filter(g => ALLOWED_GENRES.includes(g.name))
-                .sort((a, b) => a.name.localeCompare(b.name));
-            setGenres(safeGenres);
+            
+            // --- FIX: DEDUPLICATION LOGIC ---
+            // This ensures each genre name appears only once
+            const uniqueGenres = [];
+            const seenNames = new Set();
+            
+            genreRes.data.data.forEach(g => {
+                if (ALLOWED_GENRES.includes(g.name) && !seenNames.has(g.name)) {
+                    uniqueGenres.push(g);
+                    seenNames.add(g.name);
+                }
+            });
+            
+            // Sort Alphabetically
+            uniqueGenres.sort((a, b) => a.name.localeCompare(b.name));
+            setGenres(uniqueGenres);
 
             // 2. CHECK: Do we have a genre in the URL?
             // If YES, skip fetching "Top Manga". The other useEffect will handle the search.
@@ -49,14 +61,13 @@ const Manga = () => {
         } catch (err) {
             console.error(err);
         } finally {
-            // Only set loading false if we aren't waiting for the other effect
             if (!searchParams.get('genre')) setLoading(false);
         }
     };
     fetchInitialData();
   }, []);
 
-  // Handle URL Params (This runs when ?genre=X exists)
+  // Handle URL Params
   useEffect(() => {
       const genreParam = searchParams.get('genre');
       if (genreParam) {
@@ -71,7 +82,7 @@ const Manga = () => {
       setLoading(true);
       setSelectedGenre(genreId);
       try {
-          // Search Manga by Genre, sorted by Popularity (Members)
+          // Search Manga by Genre, sorted by Popularity
           const res = await api.manga.search('', genreId, 'members');
           setMangaList(res.data.data);
       } catch (err) {
