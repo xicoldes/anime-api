@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 
 const Trending = ({ animes }) => {
   return (
-    <div className="bg-hianime-sidebar p-5 rounded-xl border border-white/5">
-      <h2 className="text-lg font-bold text-hianime-accent mb-4">Most Popular</h2>
+    <div className="bg-hianime-sidebar p-5 rounded-xl border border-white/5 sticky top-24">
+      <h2 className="text-lg font-bold text-hianime-accent mb-4">Top Trending</h2>
       <div className="flex flex-col gap-3">
-        {/* UPDATED: Increased slice from 5 to 10 */}
         {animes.slice(0, 10).map((anime, index) => (
           <Link to={`/anime/${anime.mal_id}`} key={anime.mal_id} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded transition cursor-pointer group">
+            {/* Start numbering from 11 since Spotlight covers 1-10 */}
             <span className={`text-xl font-bold font-mono ${index < 3 ? 'text-hianime-accent' : 'text-gray-600'}`}>
-                {String(index + 1).padStart(2, '0')}
+                {String(index + 11).padStart(2, '0')}
             </span>
             <img 
               src={anime.images.jpg.small_image_url} 

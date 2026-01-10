@@ -5,15 +5,20 @@ const BASE = "https://api.jikan.moe/v4";
 export const api = {
     // --- ANIME ---
     anime: {
+        // SPOTLIGHT: Top 10 Currently Airing (Page 1)
         getSpotlight: async () => {
              const { data } = await axios.get(`${BASE}/seasons/now?filter=tv&sfw&limit=10`);
              return data.data; 
         },
-        // NEW: Fetch Current Season sorted by Popularity (Members)
+        
+        // TRENDING: Next 10 Currently Airing (Page 2)
+        // This ensures it uses the EXACT same "good" list as Spotlight, 
+        // just the next batch of anime.
         getTrending: async () => {
-             const { data } = await axios.get(`${BASE}/seasons/now?filter=tv&sfw&order_by=members&sort=desc&limit=10`);
+             const { data } = await axios.get(`${BASE}/seasons/now?filter=tv&sfw&page=2&limit=10`);
              return data.data; 
         },
+
         getFull: (id) => axios.get(`${BASE}/anime/${id}/full`),
         getCharacters: (id) => axios.get(`${BASE}/anime/${id}/characters`),
         getStaff: (id) => axios.get(`${BASE}/anime/${id}/staff`),
@@ -43,7 +48,7 @@ export const api = {
 
     // --- MANGA ---
     manga: {
-        getTop: () => axios.get(`${BASE}/top/manga?filter=bypopularity`), // Updated to popularity
+        getTop: () => axios.get(`${BASE}/top/manga?filter=bypopularity`),
         getDetails: (id) => axios.get(`${BASE}/manga/${id}/full`),
         getCharacters: (id) => axios.get(`${BASE}/manga/${id}/characters`),
         getRelations: (id) => axios.get(`${BASE}/manga/${id}/relations`),
@@ -60,7 +65,7 @@ export const api = {
 
     // --- TOP / TRENDING ---
     top: {
-        getAnime: () => axios.get(`${BASE}/top/anime?filter=bypopularity`), // Fallback popular list
+        getAnime: () => axios.get(`${BASE}/top/anime?filter=bypopularity`),
         getCharacters: () => axios.get(`${BASE}/top/characters`),
     },
 
