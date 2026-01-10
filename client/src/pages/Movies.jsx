@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api';
-import { FaFilter, FaFilm, FaClock, FaStar, FaTimes, FaRedo } from 'react-icons/fa';
+import { FaFilter, FaFilm, FaClock, FaStar, FaTimes, FaRedo, FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 
-// Same Allowed Genres List for Consistency
 const ALLOWED_GENRES = [
     'Action', 'Adventure', 'Cars', 'Comedy', 'Dementia', 'Demons', 'Drama', 
     'Ecchi', 'Fantasy', 'Game', 'Harem', 'Historical', 'Horror', 'Isekai', 'Josei', 
@@ -20,60 +19,63 @@ const Movies = () => {
   
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [showFilter, setShowFilter] = useState(false);
+  
+  // --- PAGINATION STATE ---
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ has_next_page: false, last_visible_page: 1 });
+
   const dataFetched = useRef(false);
 
   useEffect(() => {
     if (dataFetched.current) return;
     dataFetched.current = true;
+    fetchData(1, null);
+  }, []);
 
-    const fetchInitialData = async () => {
-        try {
-            // 1. Get Top Movies
-            const res = await api.movies.getTop();
-            setMovies(res.data.data);
-
-            // 2. Get Genres and Filter them
+  const fetchData = async (pageNum, genreId) => {
+    setLoading(true);
+    try {
+        // Load Genres if empty
+        if (genres.length === 0) {
             const genreRes = await api.anime.getGenres();
             const safeGenres = genreRes.data.data
                 .filter(g => ALLOWED_GENRES.includes(g.name))
                 .sort((a, b) => a.name.localeCompare(b.name));
             setGenres(safeGenres);
-
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
         }
-    };
-    fetchInitialData();
-  }, []);
 
-  const handleGenreClick = async (genreId) => {
-      setLoading(true);
-      setSelectedGenre(genreId);
-      try {
-          // Fetch Movies filtered by Genre, sorted by Member Count (Popularity)
-          const res = await api.movies.search(genreId, 'members');
-          setMovies(res.data.data);
-      } catch (err) {
-          console.error(err);
-      } finally {
-          setLoading(false);
-      }
+        // Fetch Movies (with pagination)
+        // Note: Using search for both "Top" (no genre) and "Filtered" to support pagination consistently
+        const res = await api.movies.search(genreId, 'members', pageNum);
+        
+        setMovies(res.data.data);
+        setPagination(res.data.pagination);
+
+    } catch (err) {
+        console.error(err);
+    } finally {
+        setLoading(false);
+    }
   };
 
-  const resetView = async () => {
-      setLoading(true);
+  const handlePageChange = (newPage) => {
+      if (newPage < 1 || (pagination.last_visible_page && newPage > pagination.last_visible_page)) return;
+      setPage(newPage);
+      fetchData(newPage, selectedGenre);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleGenreClick = (genreId) => {
+      setSelectedGenre(genreId);
+      setPage(1); // Reset to page 1
+      fetchData(1, genreId);
+  };
+
+  const resetView = () => {
       setSelectedGenre(null);
       setShowFilter(false);
-      try {
-          const res = await api.movies.getTop();
-          setMovies(res.data.data);
-      } catch (err) {
-          console.error(err);
-      } finally {
-          setLoading(false);
-      }
+      setPage(1); // Reset to page 1
+      fetchData(1, null);
   };
 
   const getPageTitle = () => {
@@ -95,8 +97,6 @@ const Movies = () => {
                 <h1 className="text-2xl font-bold text-white border-l-4 border-hianime-accent pl-4 flex items-center gap-3">
                     <FaFilm /> {getPageTitle()}
                 </h1>
-                
-                {/* Reset Button */}
                 {selectedGenre && (
                     <button onClick={resetView} className="text-xs text-red-400 hover:text-white flex items-center gap-1 bg-black/20 px-2 py-1 rounded border border-white/5 transition">
                         <FaRedo size={10} /> Reset
@@ -104,7 +104,6 @@ const Movies = () => {
                 )}
             </div>
 
-            {/* Filter Toggle */}
             <button 
                 onClick={() => setShowFilter(!showFilter)} 
                 className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-bold transition ${
@@ -117,17 +116,15 @@ const Movies = () => {
             </button>
         </div>
 
-        {/* --- CLEAN GENRE PANEL --- */}
+        {/* --- GENRE PANEL --- */}
         {showFilter && (
             <div className="bg-[#202225] p-6 rounded-xl mb-8 animate-fade-in border border-white/5">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-white font-bold text-sm">Genre</h3>
-                </div>
+                <div className="flex justify-between items-center mb-4"><h3 className="text-white font-bold text-sm">Genre</h3></div>
                 <div className="flex flex-wrap gap-2">
                     {genres.map(genre => (
                         <button 
-                            key={genre.mal_id}
-                            onClick={() => handleGenreClick(genre.mal_id)}
+                            key={genre.mal_id} 
+                            onClick={() => handleGenreClick(genre.mal_id)} 
                             className={`px-4 py-2 rounded-md text-sm transition border ${
                                 selectedGenre === genre.mal_id 
                                 ? 'bg-hianime-accent text-black border-hianime-accent font-bold' 
@@ -146,11 +143,7 @@ const Movies = () => {
             {movies.map(movie => (
                 <Link to={`/anime/${movie.mal_id}`} key={movie.mal_id} className="group cursor-pointer">
                     <div className="overflow-hidden rounded-lg aspect-[3/4] mb-3 relative">
-                        <img 
-                            src={movie.images.jpg.large_image_url} 
-                            alt={movie.title} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
-                        />
+                        <img src={movie.images.jpg.large_image_url} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                         <div className="absolute top-2 left-2 bg-hianime-accent text-black text-[10px] font-bold px-2 py-0.5 rounded-sm">
                             #{movie.rank || '?'}
                         </div>
@@ -173,6 +166,40 @@ const Movies = () => {
         
         {!loading && movies.length === 0 && (
             <div className="text-center text-gray-500 py-20">No movies found.</div>
+        )}
+
+        {/* --- PAGINATION COMPONENT --- */}
+        {movies.length > 0 && (
+            <div className="flex justify-center items-center gap-2 mt-12 animate-fade-in">
+                {/* First & Prev */}
+                <button onClick={() => handlePageChange(1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleDoubleLeft /></button>
+                <button onClick={() => handlePageChange(page - 1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleLeft /></button>
+                
+                {/* Page Numbers */}
+                <div className="flex gap-2">
+                    {[page - 2, page - 1, page, page + 1, page + 2].map(p => {
+                        // Logic to hide pages that don't exist
+                        if (p < 1 || (pagination.last_visible_page && p > pagination.last_visible_page)) return null;
+                        return (
+                            <button 
+                                key={p} 
+                                onClick={() => handlePageChange(p)} 
+                                className={`w-10 h-10 rounded-full font-bold text-sm transition shadow-lg ${
+                                    page === p 
+                                    ? 'bg-hianime-accent text-black scale-110 shadow-pink-500/20' 
+                                    : 'bg-[#202225] text-gray-400 hover:bg-white/10'
+                                }`}
+                            >
+                                {p}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Next & Last */}
+                <button onClick={() => handlePageChange(page + 1)} disabled={!pagination.has_next_page} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleRight /></button>
+                <button onClick={() => handlePageChange(pagination.last_visible_page || page + 1)} disabled={!pagination.has_next_page} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleDoubleRight /></button>
+            </div>
         )}
     </div>
   );

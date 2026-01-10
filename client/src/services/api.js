@@ -15,11 +15,12 @@ export const api = {
         getEpisodes: (id) => axios.get(`${BASE}/anime/${id}/episodes`),
         getRelations: (id) => axios.get(`${BASE}/anime/${id}/relations`), 
         
-        search: (q, genreId = null, orderBy = null, sort = 'desc') => {
-            let url = `${BASE}/anime?sfw`;
+        // Updated to accept page
+        search: (q, genreId = null, orderBy = null, page = 1) => {
+            let url = `${BASE}/anime?sfw&page=${page}`;
             if (q) url += `&q=${q}`;
             if (genreId) url += `&genres=${genreId}`;
-            if (orderBy) url += `&order_by=${orderBy}&sort=${sort}`;
+            if (orderBy) url += `&order_by=${orderBy}&sort=desc`;
             return axios.get(url);
         },
         getGenres: () => axios.get(`${BASE}/genres/anime`),
@@ -28,8 +29,9 @@ export const api = {
     // --- MOVIES ---
     movies: {
         getTop: () => axios.get(`${BASE}/top/anime?type=movie&filter=bypopularity`),
-        search: (genreId = null, orderBy = 'members') => {
-            let url = `${BASE}/anime?type=movie&sfw`;
+        // Updated to accept page
+        search: (genreId = null, orderBy = 'members', page = 1) => {
+            let url = `${BASE}/anime?type=movie&sfw&page=${page}`;
             if (genreId) url += `&genres=${genreId}`;
             if (orderBy) url += `&order_by=${orderBy}&sort=desc`;
             return axios.get(url);
@@ -43,12 +45,12 @@ export const api = {
         getCharacters: (id) => axios.get(`${BASE}/manga/${id}/characters`),
         getRelations: (id) => axios.get(`${BASE}/manga/${id}/relations`),
         
-        // FIXED: Manga Search
-        search: (q, genreId = null, orderBy = null, sort = 'desc') => {
-            let url = `${BASE}/manga?sfw`;
+        // Updated to accept page
+        search: (q, genreId = null, orderBy = null, page = 1) => {
+            let url = `${BASE}/manga?sfw&page=${page}`;
             if (q) url += `&q=${q}`;
             if (genreId) url += `&genres=${genreId}`;
-            if (orderBy) url += `&order_by=${orderBy}&sort=${sort}`;
+            if (orderBy) url += `&order_by=${orderBy}&sort=desc`;
             return axios.get(url);
         },
         getGenres: () => axios.get(`${BASE}/genres/manga`),

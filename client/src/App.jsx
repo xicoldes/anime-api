@@ -30,7 +30,8 @@ function App() {
         <Route path="/movies" element={<Movies />} />
         
         {/* Functional Routes */}
-        <Route path="/search/:query" element={<Search />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/search/:query" element={<Search />} />  
         <Route path="/login" element={<Login />} />
         <Route path="/watchlist" element={<Watchlist />} />
       </Routes>
