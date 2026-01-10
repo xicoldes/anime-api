@@ -194,7 +194,10 @@ const Home = () => {
                                 <span className="text-xs text-gray-300">{anime.type} • {anime.year || 'N/A'}</span>
                             </div>
                         </div>
-                        <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">{anime.title}</h3>
+                        {/* ENGLISH TITLE CHANGE HERE */}
+                        <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">
+                            {anime.title_english || anime.title}
+                        </h3>
                     </Link>
                 ))}
             </div>
@@ -218,7 +221,10 @@ const Home = () => {
                                     <img src={movie.images.jpg.large_image_url} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                                     <div className="absolute top-2 left-2 bg-hianime-accent text-black text-[10px] font-bold px-1.5 py-0.5 rounded-sm">MOVIE</div>
                                 </div>
-                                <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">{movie.title}</h3>
+                                {/* ENGLISH TITLE CHANGE HERE */}
+                                <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">
+                                    {movie.title_english || movie.title}
+                                </h3>
                             </Link>
                         ))}
                     </div>

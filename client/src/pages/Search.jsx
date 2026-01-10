@@ -7,16 +7,14 @@ const Search = () => {
   const { query } = useParams();
   const [searchParams] = useSearchParams();
   const searchTerm = query || searchParams.get('q');
-  const type = searchParams.get('type') || 'anime'; // Default to anime
+  const type = searchParams.get('type') || 'anime'; 
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Pagination State
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ has_next_page: false, last_visible_page: 1 });
 
-  // Reset page when search term or type changes
   useEffect(() => {
       setPage(1);
   }, [searchTerm, type]);
@@ -28,7 +26,6 @@ const Search = () => {
         setLoading(true);
         try {
             let res;
-            // CHECK: Anime or Manga search?
             if (type === 'manga') {
                 res = await api.manga.search(searchTerm, null, 'members', page);
             } else {
@@ -78,8 +75,9 @@ const Search = () => {
                                             {item.type}
                                         </div>
                                     </div>
+                                    {/* ENGLISH TITLE CHANGE HERE */}
                                     <h3 className="font-bold text-sm text-gray-200 truncate group-hover:text-hianime-accent transition">
-                                        {item.title}
+                                        {item.title_english || item.title}
                                     </h3>
                                     <p className="text-xs text-gray-500">{item.year || (item.published?.from ? new Date(item.published.from).getFullYear() : 'N/A')}</p>
                                 </Link>

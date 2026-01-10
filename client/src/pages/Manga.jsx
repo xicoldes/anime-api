@@ -86,8 +86,6 @@ const Manga = () => {
           if (genreId) {
              res = await api.manga.search('', genreId, 'members', pageNum);
           } else {
-             // Pass pageNum to getTop (requires api.js update to accept page, or use search fallback)
-             // Using search with no query to act as "browse all" which supports pagination better
              res = await api.manga.search('', null, 'members', pageNum);
           }
           
@@ -173,7 +171,10 @@ const Manga = () => {
                         <div className="absolute top-2 left-2 bg-white text-black text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase">{item.type}</div>
                         <div className="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1"><FaStar className="text-yellow-400 text-[8px]" /> {item.score}</div>
                     </div>
-                    <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">{item.title}</h3>
+                    {/* ENGLISH TITLE CHANGE HERE */}
+                    <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">
+                        {item.title_english || item.title}
+                    </h3>
                     <div className="flex items-center gap-2 text-xs text-gray-500 mt-1"><span>{item.status}</span><span>•</span><span>{item.volumes || '?'} Vols</span></div>
                 </Link>
             ))}
@@ -186,14 +187,11 @@ const Manga = () => {
         {/* --- PAGINATION COMPONENT --- */}
         {mangaList.length > 0 && (
             <div className="flex justify-center items-center gap-2 mt-12 animate-fade-in">
-                {/* First & Prev */}
                 <button onClick={() => handlePageChange(1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleDoubleLeft /></button>
                 <button onClick={() => handlePageChange(page - 1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleLeft /></button>
                 
-                {/* Page Numbers */}
                 <div className="flex gap-2">
                     {[page - 2, page - 1, page, page + 1, page + 2].map(p => {
-                        // Logic to hide pages that don't exist
                         if (p < 1 || (pagination.last_visible_page && p > pagination.last_visible_page)) return null;
                         return (
                             <button 
@@ -211,7 +209,6 @@ const Manga = () => {
                     })}
                 </div>
 
-                {/* Next & Last */}
                 <button onClick={() => handlePageChange(page + 1)} disabled={!pagination.has_next_page} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleRight /></button>
                 <button onClick={() => handlePageChange(pagination.last_visible_page || page + 1)} disabled={!pagination.has_next_page} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleDoubleRight /></button>
             </div>

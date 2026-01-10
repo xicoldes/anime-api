@@ -17,8 +17,9 @@ const Trending = ({ animes }) => {
               className="w-10 h-14 object-cover rounded"
             />
             <div className="overflow-hidden">
+                {/* ENGLISH TITLE CHANGE HERE */}
                 <h4 className="text-white font-medium text-sm truncate group-hover:text-hianime-accent transition">
-                    {anime.title}
+                    {anime.title_english || anime.title}
                 </h4>
                 <p className="text-[10px] text-gray-500 mt-0.5">{anime.type} • {anime.episodes || '?'} eps</p>
             </div>

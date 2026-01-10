@@ -35,7 +35,6 @@ const Movies = () => {
   const fetchData = async (pageNum, genreId) => {
     setLoading(true);
     try {
-        // Load Genres if empty
         if (genres.length === 0) {
             const genreRes = await api.anime.getGenres();
             const safeGenres = genreRes.data.data
@@ -44,8 +43,6 @@ const Movies = () => {
             setGenres(safeGenres);
         }
 
-        // Fetch Movies (with pagination)
-        // Note: Using search for both "Top" (no genre) and "Filtered" to support pagination consistently
         const res = await api.movies.search(genreId, 'members', pageNum);
         
         setMovies(res.data.data);
@@ -152,8 +149,9 @@ const Movies = () => {
                         </div>
                     </div>
                     
+                    {/* ENGLISH TITLE CHANGE HERE */}
                     <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">
-                        {movie.title}
+                        {movie.title_english || movie.title}
                     </h3>
                     <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                         <span className="flex items-center gap-1"><FaClock className="text-[10px]"/> {movie.duration}</span>
@@ -171,14 +169,11 @@ const Movies = () => {
         {/* --- PAGINATION COMPONENT --- */}
         {movies.length > 0 && (
             <div className="flex justify-center items-center gap-2 mt-12 animate-fade-in">
-                {/* First & Prev */}
                 <button onClick={() => handlePageChange(1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleDoubleLeft /></button>
                 <button onClick={() => handlePageChange(page - 1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleLeft /></button>
                 
-                {/* Page Numbers */}
                 <div className="flex gap-2">
                     {[page - 2, page - 1, page, page + 1, page + 2].map(p => {
-                        // Logic to hide pages that don't exist
                         if (p < 1 || (pagination.last_visible_page && p > pagination.last_visible_page)) return null;
                         return (
                             <button 
@@ -196,7 +191,6 @@ const Movies = () => {
                     })}
                 </div>
 
-                {/* Next & Last */}
                 <button onClick={() => handlePageChange(page + 1)} disabled={!pagination.has_next_page} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleRight /></button>
                 <button onClick={() => handlePageChange(pagination.last_visible_page || page + 1)} disabled={!pagination.has_next_page} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleDoubleRight /></button>
             </div>

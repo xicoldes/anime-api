@@ -107,8 +107,9 @@ const Hero = ({ animes }) => {
                 <div className="text-hianime-accent font-bold mb-2 tracking-widest text-[10px] md:text-xs uppercase flex items-center gap-2">
                     <span className="text-hianime-accent font-black">#{currentIndex + 1} Spotlight</span>
                 </div>
+                {/* ENGLISH TITLE CHANGE HERE */}
                 <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-white mb-3 leading-tight tracking-tight drop-shadow-lg line-clamp-2">
-                    {anime.title}
+                    {anime.title_english || anime.title}
                 </h1>
                 <div className="flex items-center gap-3 text-gray-300 text-[10px] md:text-xs mb-4 font-medium">
                     <span className="flex items-center gap-1.5"><FaPlayCircle className="text-hianime-accent"/> {anime.type}</span>
@@ -120,7 +121,6 @@ const Hero = ({ animes }) => {
                     {anime.synopsis}
                 </p>
                 <div className="flex gap-3">
-                    {/* Watch Now Removed. Detail button updated to primary style. */}
                     <Link to={`/anime/${anime.mal_id}`} className="bg-hianime-accent text-black px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-white transition shadow-[0_0_15px_rgba(56,189,248,0.3)] text-sm">
                         Detail <span className="ml-1">›</span>
                     </Link>
