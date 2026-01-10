@@ -7,6 +7,7 @@ const Search = () => {
   const { query } = useParams();
   const [searchParams] = useSearchParams();
   const searchTerm = query || searchParams.get('q');
+  const type = searchParams.get('type') || 'anime'; // Default to anime
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,10 +16,10 @@ const Search = () => {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ has_next_page: false, last_visible_page: 1 });
 
-  // Reset page when search term changes
+  // Reset page when search term or type changes
   useEffect(() => {
       setPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, type]);
 
   useEffect(() => {
     if (!searchTerm) return;
@@ -26,8 +27,14 @@ const Search = () => {
     const doSearch = async () => {
         setLoading(true);
         try {
-            // Pass page to API
-            const res = await api.anime.search(searchTerm, null, null, page);
+            let res;
+            // CHECK: Anime or Manga search?
+            if (type === 'manga') {
+                res = await api.manga.search(searchTerm, null, 'members', page);
+            } else {
+                res = await api.anime.search(searchTerm, null, null, page);
+            }
+            
             setResults(res.data.data);
             setPagination(res.data.pagination);
         } catch (err) { 
@@ -38,7 +45,7 @@ const Search = () => {
         }
     };
     doSearch();
-  }, [searchTerm, page]); // Re-run when page changes
+  }, [searchTerm, type, page]);
 
   const handlePageChange = (newPage) => {
       if (newPage < 1 || (pagination.last_visible_page && newPage > pagination.last_visible_page)) return;
@@ -49,7 +56,7 @@ const Search = () => {
   return (
     <div className="pt-24 min-h-screen max-w-[1400px] mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold mb-6 text-white">
-            Search Results for: <span className="text-hianime-accent">"{searchTerm}"</span>
+            {type === 'manga' ? 'Manga' : 'Anime'} Results for: <span className="text-hianime-accent">"{searchTerm}"</span>
         </h2>
         
         {loading ? (
@@ -60,7 +67,7 @@ const Search = () => {
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             {results.map(item => (
-                                <Link to={`/anime/${item.mal_id}`} key={item.mal_id} className="group">
+                                <Link to={`/${type === 'manga' ? 'manga' : 'anime'}/${item.mal_id}`} key={item.mal_id} className="group">
                                     <div className="overflow-hidden rounded-lg aspect-[3/4] mb-2 relative">
                                         <img 
                                             src={item.images.jpg.large_image_url} 
@@ -74,7 +81,7 @@ const Search = () => {
                                     <h3 className="font-bold text-sm text-gray-200 truncate group-hover:text-hianime-accent transition">
                                         {item.title}
                                     </h3>
-                                    <p className="text-xs text-gray-500">{item.year || 'N/A'}</p>
+                                    <p className="text-xs text-gray-500">{item.year || (item.published?.from ? new Date(item.published.from).getFullYear() : 'N/A')}</p>
                                 </Link>
                             ))}
                         </div>

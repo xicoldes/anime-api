@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaDatabase, FaBars, FaTimes } from 'react-icons/fa'; // Added FaBars, FaTimes
+import { FaSearch, FaDatabase, FaBars, FaTimes } from 'react-icons/fa'; 
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { api } from '../services/api'; 
 
@@ -8,7 +8,7 @@ const Navbar = () => {
   const [results, setResults] = useState([]); 
   const [showDropdown, setShowDropdown] = useState(false);
   const [user, setUser] = useState(null);
-  const [isMobileOpen, setIsMobileOpen] = useState(false); // NEW: Mobile Menu State
+  const [isMobileOpen, setIsMobileOpen] = useState(false); 
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -56,10 +56,13 @@ const Navbar = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if(query) {
-        navigate(`/search?q=${query}`); // Adjusted to query param style or keep as your preference
+        // FIX: Add type=manga if we are in Manga Mode
+        const typeParam = isMangaMode ? '&type=manga' : '&type=anime';
+        navigate(`/search?q=${query}${typeParam}`);
+        
         setShowDropdown(false);
         setQuery('');
-        setIsMobileOpen(false); // Close mobile menu on search
+        setIsMobileOpen(false); 
     }
   };
 
@@ -76,7 +79,7 @@ const Navbar = () => {
           <span>Anime<span className="text-hianime-accent">Wiki</span></span>
         </Link>
         
-        {/* DESKTOP LINKS (Hidden on Mobile) */}
+        {/* DESKTOP LINKS */}
         <div className="hidden md:flex gap-6 text-gray-400 font-medium text-sm">
             <Link to="/" className={`hover:text-white transition ${!isMangaMode ? 'text-white font-bold' : ''}`}>Home</Link>
             <Link to="/manga" className={`hover:text-white transition ${isMangaMode ? 'text-white font-bold' : ''}`}>Manga Database</Link>
@@ -84,10 +87,10 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* RIGHT SIDE: Search + User + Mobile Toggle */}
+      {/* RIGHT SIDE */}
       <div className="flex items-center gap-4 relative" ref={dropdownRef}>
         
-        {/* DESKTOP SEARCH BAR (Hidden on Mobile) */}
+        {/* DESKTOP SEARCH BAR */}
         <form onSubmit={handleSubmit} className="hidden md:flex bg-hianime-sidebar border border-white/10 rounded-full overflow-hidden h-10 w-80 focus-within:border-hianime-accent transition duration-300 relative z-50">
             <input 
                 type="text" 
@@ -102,7 +105,7 @@ const Navbar = () => {
             </button>
         </form>
 
-        {/* --- LIVE SEARCH DROPDOWN (Desktop) --- */}
+        {/* LIVE SEARCH DROPDOWN */}
         {showDropdown && results.length > 0 && (
             <div className="hidden md:block absolute top-12 right-0 w-80 bg-hianime-sidebar rounded-xl shadow-2xl border border-white/10 overflow-hidden animate-fade-in z-40">
                 <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-black/20">
@@ -149,7 +152,7 @@ const Navbar = () => {
             )}
         </div>
 
-        {/* MOBILE TOGGLE BUTTON (Visible only on Mobile) */}
+        {/* MOBILE TOGGLE BUTTON */}
         <button 
             className="md:hidden text-white text-xl p-2"
             onClick={() => setIsMobileOpen(!isMobileOpen)}
@@ -167,14 +170,14 @@ const Navbar = () => {
                 <FaSearch className="text-gray-500 ml-2" />
                 <input 
                     type="text" 
-                    placeholder="Search..." 
+                    placeholder={isMangaMode ? "Search Manga..." : "Search Anime..."} 
                     className="flex-1 bg-transparent px-3 text-white text-sm outline-none"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                 />
             </form>
 
-            {/* Mobile Results Preview (Simplified) */}
+            {/* Mobile Results Preview */}
             {query.length >= 3 && results.length > 0 && (
                 <div className="bg-black/20 rounded-lg p-2 max-h-40 overflow-y-auto">
                     {results.slice(0, 3).map(item => (
