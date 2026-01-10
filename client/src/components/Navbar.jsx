@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaDatabase } from 'react-icons/fa'; 
+import { FaSearch, FaDatabase, FaBars, FaTimes } from 'react-icons/fa'; // Added FaBars, FaTimes
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { api } from '../services/api'; // Import API
+import { api } from '../services/api'; 
 
 const Navbar = () => {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]); // Search Results
+  const [results, setResults] = useState([]); 
   const [showDropdown, setShowDropdown] = useState(false);
   const [user, setUser] = useState(null);
+  const [isMobileOpen, setIsMobileOpen] = useState(false); // NEW: Mobile Menu State
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,7 +21,6 @@ const Navbar = () => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) setUser(storedUser);
 
-    // Click outside to close dropdown
     const handleClickOutside = (event) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
             setShowDropdown(false);
@@ -40,26 +40,26 @@ const Navbar = () => {
           }
 
           try {
-              // Smart Switch: Search Manga if on Manga page, else Anime
               const searchCall = isMangaMode ? api.manga.search(query) : api.anime.search(query);
               const { data } = await searchCall;
-              setResults(data.data.slice(0, 5)); // Limit to 5 results
+              setResults(data.data.slice(0, 5)); 
               setShowDropdown(true);
           } catch (error) {
               console.error("Search failed", error);
           }
       };
 
-      const timeoutId = setTimeout(fetchResults, 500); // Debounce typing
+      const timeoutId = setTimeout(fetchResults, 500); 
       return () => clearTimeout(timeoutId);
   }, [query, isMangaMode]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if(query) {
-        navigate(`/search/${query}`);
+        navigate(`/search?q=${query}`); // Adjusted to query param style or keep as your preference
         setShowDropdown(false);
         setQuery('');
+        setIsMobileOpen(false); // Close mobile menu on search
     }
   };
 
@@ -69,13 +69,14 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-hianime-dark/95 backdrop-blur-md px-6 py-4 flex items-center justify-between shadow-xl border-b border-white/5">
+    <nav className="fixed top-0 w-full z-50 bg-hianime-dark/95 backdrop-blur-md px-4 md:px-6 py-4 flex items-center justify-between shadow-xl border-b border-white/5">
       <div className="flex items-center gap-8">
-        <Link to="/" className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 hover:opacity-80 transition">
+        <Link to="/" className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 hover:opacity-80 transition z-50">
           <FaDatabase className="text-hianime-accent" />
           <span>Anime<span className="text-hianime-accent">Wiki</span></span>
         </Link>
         
+        {/* DESKTOP LINKS (Hidden on Mobile) */}
         <div className="hidden md:flex gap-6 text-gray-400 font-medium text-sm">
             <Link to="/" className={`hover:text-white transition ${!isMangaMode ? 'text-white font-bold' : ''}`}>Home</Link>
             <Link to="/manga" className={`hover:text-white transition ${isMangaMode ? 'text-white font-bold' : ''}`}>Manga Database</Link>
@@ -83,7 +84,10 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* RIGHT SIDE: Search + User + Mobile Toggle */}
       <div className="flex items-center gap-4 relative" ref={dropdownRef}>
+        
+        {/* DESKTOP SEARCH BAR (Hidden on Mobile) */}
         <form onSubmit={handleSubmit} className="hidden md:flex bg-hianime-sidebar border border-white/10 rounded-full overflow-hidden h-10 w-80 focus-within:border-hianime-accent transition duration-300 relative z-50">
             <input 
                 type="text" 
@@ -98,9 +102,9 @@ const Navbar = () => {
             </button>
         </form>
 
-        {/* --- LIVE SEARCH DROPDOWN --- */}
+        {/* --- LIVE SEARCH DROPDOWN (Desktop) --- */}
         {showDropdown && results.length > 0 && (
-            <div className="absolute top-12 right-0 md:right-auto md:left-0 w-80 bg-hianime-sidebar rounded-xl shadow-2xl border border-white/10 overflow-hidden animate-fade-in z-40">
+            <div className="hidden md:block absolute top-12 right-0 w-80 bg-hianime-sidebar rounded-xl shadow-2xl border border-white/10 overflow-hidden animate-fade-in z-40">
                 <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-black/20">
                     {isMangaMode ? "Manga Results" : "Anime Results"}
                 </div>
@@ -119,35 +123,91 @@ const Navbar = () => {
                         <div className="flex flex-col justify-center min-w-0">
                             <h4 className="text-white text-sm font-bold truncate">{item.title}</h4>
                             <div className="text-xs text-gray-500 flex gap-2">
-                                <span>{item.year || (item.published?.from ? new Date(item.published.from).getFullYear() : 'N/A')}</span>
+                                <span>{item.year || 'N/A'}</span>
                                 <span>•</span>
                                 <span className="capitalize">{item.type}</span>
                             </div>
                         </div>
                     </Link>
                 ))}
-                <button 
-                    onClick={handleSubmit} 
-                    className="w-full text-center py-2 text-xs font-bold text-hianime-accent hover:bg-white/5 transition"
-                >
-                    View all results ›
-                </button>
             </div>
         )}
         
-        {user ? (
-            <div className="flex items-center gap-3">
-                <span className="text-gray-300 text-sm font-medium capitalize hidden md:block">{user}</span>
-                <button onClick={handleLogout} className="bg-hianime-sidebar border border-white/10 text-white px-4 py-2 rounded-full font-bold hover:bg-red-500 hover:border-red-500 transition text-xs">
-                    Logout
-                </button>
-            </div>
-        ) : (
-            <Link to="/login" className="bg-hianime-accent text-hianime-dark px-6 py-2 rounded-full font-bold hover:bg-white transition text-xs shadow-[0_0_10px_rgba(56,189,248,0.4)]">
-                Login
-            </Link>
-        )}
+        {/* DESKTOP USER SECTION */}
+        <div className="hidden md:flex items-center gap-3">
+            {user ? (
+                <>
+                    <span className="text-gray-300 text-sm font-medium capitalize">{user}</span>
+                    <button onClick={handleLogout} className="bg-hianime-sidebar border border-white/10 text-white px-4 py-2 rounded-full font-bold hover:bg-red-500 hover:border-red-500 transition text-xs">
+                        Logout
+                    </button>
+                </>
+            ) : (
+                <Link to="/login" className="bg-hianime-accent text-hianime-dark px-6 py-2 rounded-full font-bold hover:bg-white transition text-xs shadow-[0_0_10px_rgba(56,189,248,0.4)]">
+                    Login
+                </Link>
+            )}
+        </div>
+
+        {/* MOBILE TOGGLE BUTTON (Visible only on Mobile) */}
+        <button 
+            className="md:hidden text-white text-xl p-2"
+            onClick={() => setIsMobileOpen(!isMobileOpen)}
+        >
+            {isMobileOpen ? <FaTimes /> : <FaBars />}
+        </button>
       </div>
+
+      {/* --- MOBILE MENU DROPDOWN --- */}
+      {isMobileOpen && (
+        <div className="absolute top-16 left-0 w-full bg-[#151719] border-t border-white/10 shadow-2xl p-4 flex flex-col gap-4 md:hidden animate-slide-down">
+            
+            {/* Mobile Search */}
+            <form onSubmit={handleSubmit} className="bg-black/40 border border-white/10 rounded-lg flex items-center p-2">
+                <FaSearch className="text-gray-500 ml-2" />
+                <input 
+                    type="text" 
+                    placeholder="Search..." 
+                    className="flex-1 bg-transparent px-3 text-white text-sm outline-none"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                />
+            </form>
+
+            {/* Mobile Results Preview (Simplified) */}
+            {query.length >= 3 && results.length > 0 && (
+                <div className="bg-black/20 rounded-lg p-2 max-h-40 overflow-y-auto">
+                    {results.slice(0, 3).map(item => (
+                         <Link 
+                            to={isMangaMode ? `/manga/${item.mal_id}` : `/anime/${item.mal_id}`} 
+                            key={item.mal_id}
+                            onClick={() => setIsMobileOpen(false)}
+                            className="flex items-center gap-3 p-2 hover:bg-white/5 rounded"
+                        >
+                            <img src={item.images.jpg.image_url} className="w-8 h-10 object-cover rounded" alt=""/>
+                            <div className="text-xs text-white truncate">{item.title}</div>
+                        </Link>
+                    ))}
+                </div>
+            )}
+
+            {/* Mobile Links */}
+            <div className="flex flex-col gap-2">
+                <Link to="/" onClick={() => setIsMobileOpen(false)} className="text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5">Home</Link>
+                <Link to="/manga" onClick={() => setIsMobileOpen(false)} className="text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5">Manga Database</Link>
+                <Link to="/watchlist" onClick={() => setIsMobileOpen(false)} className="text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5">My Collections</Link>
+            </div>
+
+            {/* Mobile User Actions */}
+            <div className="mt-2">
+                {user ? (
+                    <button onClick={handleLogout} className="w-full bg-red-500/10 text-red-400 py-2 rounded-lg font-bold text-sm">Logout ({user})</button>
+                ) : (
+                    <Link to="/login" onClick={() => setIsMobileOpen(false)} className="block w-full text-center bg-hianime-accent text-black py-2 rounded-lg font-bold text-sm">Login</Link>
+                )}
+            </div>
+        </div>
+      )}
     </nav>
   );
 };
