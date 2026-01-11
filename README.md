@@ -1,6 +1,6 @@
-# 🍙 AnimeWiki - Ultimate Anime Discovery Platform
+# 🍙 AniManga - Ultimate Anime Discovery Platform
 
-<img width="1919" height="1057" alt="image" src="https://github.com/user-attachments/assets/a6e34bac-f2b6-45ef-a535-9a2ee9164732" />
+<img width="1919" height="1058" alt="image" src="https://github.com/user-attachments/assets/a92ff77c-a73e-4f22-aefe-54ab09055f76" />
 
 > A modern, responsive, and feature-rich anime discovery web application powered by the **Jikan API (MyAnimeList)**. Built with React and Tailwind CSS.
 
