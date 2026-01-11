@@ -1,8 +1,8 @@
-# 🍙 AnimeWiki - Ultimate Anime Discovery Platform
+# 🍙 AniManga - Ultimate Discovery Platform
 
-<img width="1919" height="1057" alt="image" src="https://github.com/user-attachments/assets/a6e34bac-f2b6-45ef-a535-9a2ee9164732" />
+<img width="1919" height="1058" alt="AniManga Dashboard" src="https://github.com/user-attachments/assets/a92ff77c-a73e-4f22-aefe-54ab09055f76" />
 
-> A modern, responsive, and feature-rich anime discovery web application powered by the **Jikan API (MyAnimeList)**. Built with React and Tailwind CSS.
+> A modern, responsive, and feature-rich anime & manga discovery web application powered by the **Jikan API (MyAnimeList)**. Built with React and Tailwind CSS.
 
 ---
 
@@ -11,38 +11,35 @@
 
 ---
 
-## 🚀 Features
+## 🚀 Key Features
 
-### **1. 🏠 Home Page**
-* **Spotlight Slider:** A panoramic, auto-sliding hero section showcasing trending anime with a professional "Text-Left, Image-Right" layout.
-    * *Interactive:* Supports click-and-drag (or swipe) navigation.
-    * *Visuals:* Includes progress indicators and navigation dots.
-* **Latest Episodes:** Real-time updates of currently airing episodes.
-* **Popular Movies:** A dedicated section highlighting top-rated anime movies.
-* **Trending Sidebar:** A quick-look vertical list of top-ranked series.
-* **Smart Filtering:** Filter content by **Genre** or sort by **Popularity, Score, Name, Date, etc.**
+### **1. 🏠 Immersive Home Experience**
+* **Cinematic Spotlight:** A "Frieren-style" auto-sliding hero section with high-quality visuals, English titles, and a clean interface (no dark overlays).
+    * *Mobile Optimized:* Features a vertical gradient for readability and touch-friendly navigation.
+* **True Trending Sidebar:** Displays the **Top 11-20** currently airing shows to complement the spotlight without duplicates.
+* **Smart Filtering:** Sort content by **Genre**, **Popularity**, or **Score**.
+* **Latest Episodes:** Real-time updates for currently airing series.
 
 ### **2. 📚 Manga Database**
-* **Extensive Library:** Browse thousands of manga titles.
-* **Advanced Deduplication:** Ensures unique entries for cleaner browsing.
-* **Pagination:** Smooth page navigation (Next/Prev/Numbered) to browse large collections.
-* **Read Now Integration:** Direct "Read Now" button links to external reading sources (MangaKatana) dynamically based on the title.
+* **Extensive Library:** Browse thousands of manga titles with advanced deduplication.
+* **Read Now Integration:** Smart buttons that dynamically link to reading sources (e.g., MangaKatana) based on the title.
+* **Pagination:** Smooth navigation for large collections.
 
-### **3. 🔍 Advanced Search**
-* **Real-time Results:** Search for Anime or Manga with instant feedback.
-* **Smart Detection:** Automatically detects if searching for Anime or Manga based on the active page.
-* **Deep Linking:** Shareable search URLs (e.g., `/search?q=naruto`).
+### **3. 🔍 Smart Search**
+* **Context-Aware:** Automatically detects if you are searching for **Anime** or **Manga** based on your active page.
+* **Live Results:** Instant dropdown feedback as you type.
+* **Deep Linking:** Shareable search URLs (e.g., `/search?q=jujutsu`).
 
-### **4. 📄 Detailed Info Pages**
-* **Rich Metadata:** Displays Score, Rank, Popularity, Members, and Synopsis.
-* **Character Grid:** Shows main and supporting characters with images.
-* **Related Entries:** Links to prequels, sequels, and side stories.
-* **Author Wiki:** Quick links to search authors on Google/Wiki.
+### **4. 📄 Rich Detail Pages**
+* **Wiki Layout:** A classic 3-column design displaying metadata (Score, Rank, Popularity), synopsis, and background info.
+* **Trailer Integration:** Watch official trailers directly on the page.
+* **Character Grid:** Visual cast lists with roles (Main/Supporting).
+* **Author Search:** Quick links to find manga authors on Google/Wiki.
 
 ### **5. ❤️ User Collections (Watchlist)**
-* **Local Storage Auth:** Simple login simulation (no backend required).
-* **Bookmark System:** Add or remove Anime/Manga to your personal collection.
-* **Persistent State:** Remembers your list even after refreshing.
+* **Horizontal Scroll UI:** A Netflix-style horizontal list for your saved Anime and Manga.
+* **Jump Controls:** New `<<` and `>>` buttons to instantly jump to the start or end of your collection.
+* **Local Storage Auth:** Persistent bookmarking system that remembers your list without requiring a backend.
 
 ---
 
@@ -52,7 +49,7 @@
 * **Styling:** Tailwind CSS
 * **API:** Jikan API v4 (Unofficial MyAnimeList API)
 * **Routing:** React Router DOM
-* **Icons:** React Icons (FontAwesome)
+* **Icons:** React Icons (FontAwesome/Feather)
 * **Deployment:** Render
 
 ---
@@ -61,8 +58,8 @@
 
 1. **Clone the repository**
 ```bash
-   git clone [https://github.com/your-username/animewiki.git](https://github.com/your-username/animewiki.git)
-   cd animewiki
+   git clone https://github.com/xicoldes/anime-api.git
+   cd anime-api
 ```
 ### **2. Install Frontend Dependencies**
 
