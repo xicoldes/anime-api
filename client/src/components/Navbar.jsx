@@ -73,14 +73,25 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-hianime-dark/95 backdrop-blur-md px-4 md:px-6 py-4 flex items-center justify-between shadow-xl border-b border-white/5">
-      <div className="flex items-center gap-8">
+      
+      {/* Left Side: Mobile Menu Button & Logo */}
+      <div className="flex items-center gap-4">
+        {/* MOBILE TOGGLE BUTTON */}
+        <button 
+            className="md:hidden text-white text-xl p-2"
+            onClick={() => setIsMobileOpen(!isMobileOpen)}
+        >
+            {isMobileOpen ? <FaTimes /> : <FaBars />}
+        </button>
+
+        {/* LOGO UPDATED HERE */}
         <Link to="/" className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 hover:opacity-80 transition z-50">
           <FaDatabase className="text-hianime-accent" />
-          <span>Anime<span className="text-hianime-accent">Wiki</span></span>
+          <span>Ani<span className="text-hianime-accent">Manga</span></span>
         </Link>
         
         {/* DESKTOP LINKS */}
-        <div className="hidden md:flex gap-6 text-gray-400 font-medium text-sm">
+        <div className="hidden md:flex gap-6 text-gray-400 font-medium text-sm ml-4">
             <Link to="/" className={`hover:text-white transition ${!isMangaMode ? 'text-white font-bold' : ''}`}>Home</Link>
             <Link to="/manga" className={`hover:text-white transition ${isMangaMode ? 'text-white font-bold' : ''}`}>Manga Database</Link>
             <Link to="/watchlist" className="hover:text-white transition">My Collections</Link>
@@ -152,13 +163,20 @@ const Navbar = () => {
             )}
         </div>
 
-        {/* MOBILE TOGGLE BUTTON */}
-        <button 
-            className="md:hidden text-white text-xl p-2"
-            onClick={() => setIsMobileOpen(!isMobileOpen)}
-        >
-            {isMobileOpen ? <FaTimes /> : <FaBars />}
-        </button>
+        {/* MOBILE RIGHT SIDE ELEMENTS (Search Icon & Login) */}
+        <div className="flex items-center gap-3 md:hidden">
+            <button className="text-white text-xl" onClick={() => setIsMobileOpen(!isMobileOpen)}>
+                <FaSearch />
+            </button>
+            {user ? (
+                 <button onClick={handleLogout} className="text-white text-sm font-bold">Logout</button>
+            ) : (
+                <Link to="/login" className="bg-hianime-accent text-hianime-dark px-4 py-1.5 rounded-full font-bold hover:bg-white transition text-sm shadow-[0_0_10px_rgba(56,189,248,0.4)]">
+                    Login
+                </Link>
+            )}
+        </div>
+
       </div>
 
       {/* --- MOBILE MENU DROPDOWN --- */}
@@ -199,15 +217,6 @@ const Navbar = () => {
                 <Link to="/" onClick={() => setIsMobileOpen(false)} className="text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5">Home</Link>
                 <Link to="/manga" onClick={() => setIsMobileOpen(false)} className="text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5">Manga Database</Link>
                 <Link to="/watchlist" onClick={() => setIsMobileOpen(false)} className="text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5">My Collections</Link>
-            </div>
-
-            {/* Mobile User Actions */}
-            <div className="mt-2">
-                {user ? (
-                    <button onClick={handleLogout} className="w-full bg-red-500/10 text-red-400 py-2 rounded-lg font-bold text-sm">Logout ({user})</button>
-                ) : (
-                    <Link to="/login" onClick={() => setIsMobileOpen(false)} className="block w-full text-center bg-hianime-accent text-black py-2 rounded-lg font-bold text-sm">Login</Link>
-                )}
             </div>
         </div>
       )}
