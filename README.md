@@ -14,7 +14,7 @@
 ## 🚀 Key Features
 
 ### **1. 🏠 Immersive Home Experience**
-* **Cinematic Spotlight:** A "Frieren-style" auto-sliding hero section with high-quality visuals, English titles, and a clean interface (no dark overlays).
+* **Cinematic Spotlight:** An auto-sliding hero section with high-quality visuals, English titles, and a clean interface (no dark overlays).
     * *Mobile Optimized:* Features a vertical gradient for readability and touch-friendly navigation.
 * **True Trending Sidebar:** Displays the **Top 11-20** currently airing shows to complement the spotlight without duplicates.
 * **Smart Filtering:** Sort content by **Genre**, **Popularity**, or **Score**.
