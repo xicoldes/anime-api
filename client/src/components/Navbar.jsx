@@ -26,6 +26,19 @@ const Navbar = () => {
   const isMangaPage = path.includes('/manga');
   const isMoviesPage = path.includes('/movies');
 
+  // --- 1. NEW: SYNC SEARCH BAR WITH URL ---
+  // If we are on the Search Results page, populate the bar with the current keyword.
+  // If we leave the search page (go to Home/Details), clear the bar.
+  useEffect(() => {
+    if (path === '/search') {
+        const params = new URLSearchParams(location.search);
+        const q = params.get('q');
+        if (q) setQuery(q);
+    } else {
+        setQuery('');
+    }
+  }, [path, location.search]);
+
   useEffect(() => {
     // Smart Defaults for Search Type based on Page
     if (isMangaPage) {
@@ -102,7 +115,7 @@ const Navbar = () => {
 
         navigate(url);
         setShowDropdown(false);
-        setQuery('');
+        // REMOVED: setQuery('') -> This keeps the text in the box!
         setIsMobileOpen(false); 
     }
   };
@@ -134,7 +147,7 @@ const Navbar = () => {
           <span>Ani<span className="text-hianime-accent">Manga</span></span>
         </Link>
         
-        {/* --- DESKTOP NAV LINKS (UPDATED) --- */}
+        {/* --- DESKTOP NAV LINKS --- */}
         <div className="hidden md:flex gap-6 text-gray-400 font-medium text-sm ml-4">
             <Link to="/" className={`hover:text-white transition ${path === '/' ? 'text-white font-bold' : ''}`}>
                 Home
@@ -206,6 +219,7 @@ const Navbar = () => {
                     <Link 
                         to={item.type === 'Manga' ? `/manga/${item.mal_id}` : `/anime/${item.mal_id}`} 
                         key={item.mal_id}
+                        // We still clear query here because if you CLICK a result, you are leaving the search page.
                         onClick={() => { setShowDropdown(false); setQuery(''); }}
                         className="flex gap-3 p-3 hover:bg-white/5 transition border-b border-white/5 last:border-0"
                     >
@@ -253,7 +267,7 @@ const Navbar = () => {
 
       </div>
 
-      {/* --- MOBILE MENU (UPDATED) --- */}
+      {/* --- MOBILE MENU --- */}
       {isMobileOpen && (
         <div className="absolute top-16 left-0 w-full bg-[#151719] border-t border-white/10 shadow-2xl p-4 flex flex-col gap-4 md:hidden animate-slide-down">
             
