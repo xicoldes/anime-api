@@ -9,7 +9,7 @@ const Navbar = () => {
   const [results, setResults] = useState([]); 
   const [showDropdown, setShowDropdown] = useState(false);
   
-  // Search Type State
+  // Search Type State (Internal values: 'all', 'anime', 'movie', 'manga')
   const [searchType, setSearchType] = useState('all'); 
   const [showTypeMenu, setShowTypeMenu] = useState(false);
 
@@ -69,7 +69,7 @@ const Navbar = () => {
                   const hasEnglishTitle = item.title_english != null;
                   
                   if (searchType === 'movie' && item.type !== 'Movie') return false;
-                  if (searchType === 'anime' && item.type === 'Movie') return false;
+                  if (searchType === 'anime' && item.type === 'Movie') return false; // 'anime' means Series (TV)
 
                   return !isBanned && hasEnglishTitle;
               });
@@ -107,10 +107,13 @@ const Navbar = () => {
       window.location.href = '/';
   };
 
-  const getTypeLabel = () => {
-      if (searchType === 'manga') return 'Manga';
-      if (searchType === 'movie') return 'Movies';
-      if (searchType === 'anime') return 'Anime';
+  // --- DISPLAY LABELS ---
+  const getTypeLabel = (type) => {
+      // Use passed type or current state
+      const t = type || searchType;
+      if (t === 'manga') return 'Manga';
+      if (t === 'movie') return 'Movies';
+      if (t === 'anime') return 'Series'; // Renamed "Anime" to "Series"
       return 'All';
   };
 
@@ -138,7 +141,6 @@ const Navbar = () => {
       {/* --- CENTER SEARCH BAR --- */}
       <div className="flex items-center gap-4 relative" ref={dropdownRef}>
         
-        {/* REMOVED 'overflow-hidden' from form class */}
         <form onSubmit={handleSubmit} className="hidden md:flex bg-hianime-sidebar border border-white/10 rounded-full h-10 w-[450px] focus-within:border-hianime-accent transition duration-300 relative z-50">
             
             {/* TYPE SELECTOR */}
@@ -146,7 +148,6 @@ const Navbar = () => {
                 <button 
                     type="button"
                     onClick={() => setShowTypeMenu(!showTypeMenu)}
-                    // Added rounded-l-full to maintain shape
                     className="h-full px-4 flex items-center gap-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 transition bg-black/20 min-w-[90px] justify-between rounded-l-full"
                 >
                     {getTypeLabel()} <FaCaretDown />
@@ -161,7 +162,7 @@ const Navbar = () => {
                                 onClick={() => { setSearchType(t); setShowTypeMenu(false); }}
                                 className={`block w-full text-left px-4 py-2 text-xs font-bold hover:bg-white/10 transition capitalize ${searchType === t ? 'text-hianime-accent' : 'text-gray-400'}`}
                             >
-                                {t === 'all' ? 'All' : t}
+                                {getTypeLabel(t)} {/* Uses "Series" instead of "Anime" */}
                             </button>
                         ))}
                     </div>
@@ -177,7 +178,6 @@ const Navbar = () => {
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => { if(results.length > 0) setShowDropdown(true); }}
             />
-            {/* Added rounded-r-full */}
             <button type="submit" className="px-4 text-gray-400 hover:text-white rounded-r-full">
                 <FaSearch />
             </button>
@@ -261,7 +261,7 @@ const Navbar = () => {
                                 : 'bg-transparent text-gray-400 border-white/10'
                             }`}
                         >
-                            {t}
+                            {getTypeLabel(t)}
                         </button>
                     ))}
                 </div>
