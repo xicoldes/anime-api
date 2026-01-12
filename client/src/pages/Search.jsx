@@ -1,121 +1,90 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { api } from '../services/api';
-import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
+import { useSearchParams, Link } from 'react-router-dom';
+import axios from 'axios';
+import { FaPlayCircle, FaSearch, FaClock } from 'react-icons/fa';
+import { BANNED_IDS } from '../utils/banned'; 
 
 const Search = () => {
-  const { query } = useParams();
   const [searchParams] = useSearchParams();
-  const searchTerm = query || searchParams.get('q');
-  const type = searchParams.get('type') || 'anime'; 
-
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const query = searchParams.get('keyword') || searchParams.get('q'); 
+  const type = searchParams.get('type'); // 1. GET TYPE FROM URL
   
-  const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState({ has_next_page: false, last_visible_page: 1 });
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-      setPage(1);
-  }, [searchTerm, type]);
+    if (!query) return;
 
-  useEffect(() => {
-    if (!searchTerm) return;
-
-    const doSearch = async () => {
+    const performSearch = async () => {
         setLoading(true);
         try {
-            let res;
-            if (type === 'manga') {
-                res = await api.manga.search(searchTerm, null, 'members', page);
-            } else {
-                res = await api.anime.search(searchTerm, null, null, page);
-            }
+            await new Promise(r => setTimeout(r, 300));
+
+            // 2. CONSTRUCT URL WITH TYPE
+            let url = `https://api.jikan.moe/v4/anime?q=${query}&sfw=true&order_by=members&sort=desc`;
             
-            setResults(res.data.data);
-            setPagination(res.data.pagination);
-        } catch (err) { 
-            console.error(err); 
+            // If type is "movie", append it to the API URL
+            if (type === 'movie') {
+                url += `&type=movie`;
+            }
+
+            const res = await axios.get(url);
+            
+            if (res.data.data) {
+                // Apply Ban Filter
+                const cleanData = res.data.data.filter(item => {
+                    return !BANNED_IDS.some(id => String(id) === String(item.mal_id));
+                });
+                setResults(cleanData);
+            }
+        } catch (err) {
+            console.error("Search error", err);
             setResults([]);
         } finally {
             setLoading(false);
         }
     };
-    doSearch();
-  }, [searchTerm, type, page]);
 
-  const handlePageChange = (newPage) => {
-      if (newPage < 1 || (pagination.last_visible_page && newPage > pagination.last_visible_page)) return;
-      setPage(newPage);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    performSearch();
+  }, [query, type]); // 3. ADD TYPE TO DEPENDENCIES
 
   return (
-    <div className="pt-24 min-h-screen max-w-[1400px] mx-auto px-6 pb-20">
-        <h2 className="text-2xl font-bold mb-6 text-white">
-            {type === 'manga' ? 'Manga' : 'Anime'} Results for: <span className="text-hianime-accent">"{searchTerm}"</span>
-        </h2>
-        
+    <div className="pt-24 min-h-screen max-w-[1400px] mx-auto px-4 pb-20">
+        <h1 className="text-2xl font-bold text-white mb-6 border-l-4 border-hianime-accent pl-4 flex items-center gap-2">
+            <FaSearch /> Search Results for: <span className="text-hianime-accent">"{query}"</span>
+            {type === 'movie' && <span className="text-xs bg-hianime-accent text-black px-2 py-1 rounded ml-2">MOVIES</span>}
+        </h1>
+
         {loading ? (
-            <div className="text-center text-hianime-accent mt-20">Loading Results...</div>
+            <div className="text-center text-hianime-accent font-bold mt-20">Searching...</div>
         ) : (
             <>
-                {results && results.length > 0 ? (
-                    <>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                            {results.map(item => (
-                                <Link to={`/${type === 'manga' ? 'manga' : 'anime'}/${item.mal_id}`} key={item.mal_id} className="group">
-                                    <div className="overflow-hidden rounded-lg aspect-[3/4] mb-2 relative">
-                                        <img 
-                                            src={item.images.jpg.large_image_url} 
-                                            alt={item.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
-                                        />
-                                        <div className="absolute top-2 left-2 bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-sm uppercase">
-                                            {item.type}
-                                        </div>
+                {results.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                        {results.map(anime => (
+                            <Link to={`/anime/${anime.mal_id}`} key={anime.mal_id} className="group cursor-pointer">
+                                <div className="overflow-hidden rounded-lg aspect-[3/4] mb-3 relative">
+                                    <img src={anime.images.jpg.large_image_url} alt={anime.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                                    <div className="absolute top-2 left-2 bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
+                                        {anime.score ? `★ ${anime.score}` : 'Ep ?'}
                                     </div>
-                                    {/* ENGLISH TITLE CHANGE HERE */}
-                                    <h3 className="font-bold text-sm text-gray-200 truncate group-hover:text-hianime-accent transition">
-                                        {item.title_english || item.title}
-                                    </h3>
-                                    <p className="text-xs text-gray-500">{item.year || (item.published?.from ? new Date(item.published.from).getFullYear() : 'N/A')}</p>
-                                </Link>
-                            ))}
-                        </div>
-
-                         {/* --- PAGINATION COMPONENT --- */}
-                        <div className="flex justify-center items-center gap-2 mt-12 animate-fade-in">
-                            <button onClick={() => handlePageChange(1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleDoubleLeft /></button>
-                            <button onClick={() => handlePageChange(page - 1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleLeft /></button>
-                            
-                            <div className="flex gap-2">
-                                {[page - 2, page - 1, page, page + 1, page + 2].map(p => {
-                                    if (p < 1 || (pagination.last_visible_page && p > pagination.last_visible_page)) return null;
-                                    return (
-                                        <button 
-                                            key={p} 
-                                            onClick={() => handlePageChange(p)} 
-                                            className={`w-10 h-10 rounded-full font-bold text-sm transition shadow-lg ${
-                                                page === p 
-                                                ? 'bg-hianime-accent text-black scale-110 shadow-pink-500/20' 
-                                                : 'bg-[#202225] text-gray-400 hover:bg-white/10'
-                                            }`}
-                                        >
-                                            {p}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            <button onClick={() => handlePageChange(page + 1)} disabled={!pagination.has_next_page} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleRight /></button>
-                            <button onClick={() => handlePageChange(pagination.last_visible_page || page + 1)} disabled={!pagination.has_next_page} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleDoubleRight /></button>
-                        </div>
-                    </>
-                ) : (
-                    <div className="text-center text-gray-500 mt-20">
-                        No results found for "{searchTerm}".
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                                        <FaPlayCircle className="text-white text-4xl drop-shadow-lg" />
+                                    </div>
+                                </div>
+                                <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">
+                                    {anime.title_english || anime.title}
+                                </h3>
+                                <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                                    <span className="flex items-center gap-1"><FaClock className="text-[10px]"/> {anime.duration || '24m'}</span>
+                                    <span>•</span>
+                                    <span>{anime.year || 'N/A'}</span>
+                                </div>
+                            </Link>
+                        ))}
                     </div>
+                ) : (
+                    <div className="text-center text-gray-500 mt-20">No results found.</div>
                 )}
             </>
         )}

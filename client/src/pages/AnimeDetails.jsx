@@ -3,8 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { 
     FaPlay, FaStar, FaPlus, FaCheck, FaChevronUp, 
-    FaCalendarAlt, FaClock 
+    FaCalendarAlt, FaClock, FaExclamationTriangle
 } from 'react-icons/fa';
+import { BANNED_IDS } from '../utils/banned'; // <--- IMPORT THIS
 
 const AnimeDetails = () => {
   const { id } = useParams();
@@ -12,12 +13,19 @@ const AnimeDetails = () => {
   const [characters, setCharacters] = useState([]);
   const [isAdded, setIsAdded] = useState(false);
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
+  const [loading, setLoading] = useState(true); // Added loading state
 
   const user = localStorage.getItem('user'); 
   const listKey = `watchlist_${user}`; 
 
+  // --- CHECK BAN STATUS IMMEDIATELY ---
+  const isBanned = BANNED_IDS.some(bannedId => String(bannedId) === String(id));
+
   useEffect(() => {
+    if (isBanned) return; // Don't fetch if banned
+
     window.scrollTo(0, 0);
+    setLoading(true);
     
     if (user) {
         const savedList = JSON.parse(localStorage.getItem(listKey)) || [];
@@ -26,13 +34,36 @@ const AnimeDetails = () => {
         }
     }
 
-    api.anime.getFull(id).then(res => setAnime(res.data.data));
+    // Fetch Data
+    api.anime.getFull(id)
+        .then(res => {
+            setAnime(res.data.data);
+            setLoading(false);
+        })
+        .catch(err => {
+            console.error(err);
+            setLoading(false);
+        });
     
     api.anime.getCharacters(id)
         .then(res => setCharacters(res.data.data))
         .catch(err => console.error(err));
 
-  }, [id, listKey, user]);
+  }, [id, listKey, user, isBanned]);
+
+  // --- SHOW "404" IF BANNED ---
+  if (isBanned) {
+      return (
+        <div className="h-screen flex flex-col items-center justify-center text-gray-400 bg-hianime-dark">
+            <FaExclamationTriangle className="text-6xl text-red-500 mb-4" />
+            <h1 className="text-3xl font-bold text-white mb-2">Content Unavailable</h1>
+            <p className="mb-6">This anime is not available on this platform.</p>
+            <Link to="/" className="px-6 py-2 bg-hianime-accent text-black rounded-full font-bold hover:bg-white transition">
+                Return Home
+            </Link>
+        </div>
+      );
+  }
 
   const handleAddToList = () => {
       if (!user) {
@@ -50,9 +81,8 @@ const AnimeDetails = () => {
       localStorage.setItem(listKey, JSON.stringify(savedList));
   };
 
-  if (!anime) return <div className="h-screen flex items-center justify-center text-hianime-accent">Loading...</div>;
+  if (loading || !anime) return <div className="h-screen flex items-center justify-center text-hianime-accent">Loading...</div>;
 
-  // Helper to check if it's a movie
   const isMovie = anime.type === 'Movie';
 
   return (
@@ -207,7 +237,6 @@ const AnimeDetails = () => {
                     <div className="mt-6">
                         <span className="font-bold text-white block mb-2 text-xs uppercase opacity-70">Genres</span>
                         <div className="flex flex-wrap gap-1.5">
-                            {/* UPDATED LINK LOGIC: Links directly to /anime or /movies page to fix Back Button */}
                             {[...(anime.genres || []), ...(anime.themes || []), ...(anime.demographics || [])].map(g => (
                                 <Link 
                                     key={g.mal_id} 

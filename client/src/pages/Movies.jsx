@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaFilm, FaClock, FaStar, FaRedo, FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight, FaTimes, FaFilter } from 'react-icons/fa';
+import { BANNED_IDS } from '../utils/banned'; // Import the Blacklist
 
 const Movies = () => {
   const [movies, setMovies] = useState([]);
@@ -21,10 +22,9 @@ const Movies = () => {
 
   const [pagination, setPagination] = useState({ has_next_page: false, last_visible_page: 1 });
 
-  // 1. Fetch Genres (Cached Logic)
+  // 1. Fetch Genres (Cached - Shared with Anime page)
   useEffect(() => {
     const fetchGenres = async () => {
-      // Check cache first
       const cachedGenres = localStorage.getItem('animewiki_genres');
       if (cachedGenres) {
           const parsed = JSON.parse(cachedGenres);
@@ -58,7 +58,7 @@ const Movies = () => {
     fetchGenres();
   }, []);
 
-  // 2. Fetch Movies (Auto-Retry Logic)
+  // 2. Fetch Movies (With Ban Filter & Type Fixes)
   const fetchData = async (retryCount = 0) => {
     if (retryCount === 0) setLoading(true);
     setError(null);
@@ -67,23 +67,27 @@ const Movies = () => {
 
     try {
         let url;
-        // BASE QUERY: Always type=movie
         let query = `type=movie&sfw=true&page=${page}&order_by=members&sort=desc`;
 
         if (selectedGenre) {
-            // GENRE FILTER
+            // GENRE FILTER: Forces type=movie
             url = `https://api.jikan.moe/v4/anime?${query}&genres=${selectedGenre}`;
         } else {
-            // DEFAULT: Top Movies
-            // Note: Jikan's /top/anime doesn't support 'genre' param well mixed with others, 
-            // so we use the search endpoint for everything to be safe, or specific top endpoint for default.
+            // DEFAULT: Top Popular Movies
             url = `https://api.jikan.moe/v4/top/anime?type=movie&filter=bypopularity&sfw=true&page=${page}`;
         }
 
         const res = await axios.get(url);
         
         if (res.data.data) {
-            setMovies(res.data.data);
+            // --- FIXED BAN FUNCTION ---
+            // Converts both IDs to strings to ensure matching works correctly
+            const cleanData = res.data.data.filter(item => {
+                const isBanned = BANNED_IDS.some(bannedId => String(bannedId) === String(item.mal_id));
+                return !isBanned;
+            });
+            
+            setMovies(cleanData);
             setPagination(res.data.pagination || { has_next_page: false });
             setLoading(false);
         } else {

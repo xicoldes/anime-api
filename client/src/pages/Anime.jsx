@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaPlayCircle, FaClock, FaRedo, FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight, FaTimes, FaFilter } from 'react-icons/fa';
+import { BANNED_IDS } from '../utils/banned'; // Import the Blacklist
 
 const Anime = () => {
   const [animes, setAnimes] = useState([]);
@@ -58,7 +59,7 @@ const Anime = () => {
     fetchGenres();
   }, []);
 
-  // 2. Main Data Fetching
+  // 2. Main Data Fetching (With Ban Filter & Type Fixes)
   const fetchData = async (retryCount = 0) => {
     if (retryCount === 0) setLoading(true);
     setError(null);
@@ -68,17 +69,24 @@ const Anime = () => {
     try {
         let url;
         if (selectedGenre) {
-            // FILTER MODE: Added &type=tv to exclude movies
+            // FILTER MODE: Search by Genre (Restricted to TV)
             url = `https://api.jikan.moe/v4/anime?sfw=true&type=tv&genres=${selectedGenre}&order_by=members&sort=desc&page=${page}`;
         } else {
-            // DEFAULT MODE: Added &filter=tv to exclude movies from seasonal
+            // DEFAULT MODE: Seasonal Now (Restricted to TV)
             url = `https://api.jikan.moe/v4/seasons/now?sfw=true&filter=tv&page=${page}`;
         }
 
         const res = await axios.get(url);
         
         if (res.data.data) {
-            setAnimes(res.data.data);
+            // --- FIXED BAN FUNCTION ---
+            // Converts both IDs to strings to ensure "20" matches 20
+            const cleanData = res.data.data.filter(item => {
+                const isBanned = BANNED_IDS.some(bannedId => String(bannedId) === String(item.mal_id));
+                return !isBanned;
+            });
+
+            setAnimes(cleanData);
             setPagination(res.data.pagination || { has_next_page: false });
             setLoading(false);
         } else {
@@ -135,6 +143,7 @@ const Anime = () => {
 
   return (
     <div className="pt-24 min-h-screen max-w-[1400px] mx-auto px-4 pb-20">
+        
         {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <div className="flex items-center gap-3 self-start md:self-auto">
