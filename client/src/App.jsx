@@ -7,9 +7,10 @@ import Navbar from './components/Navbar';
 // Import Pages
 import Home from './pages/Home';
 import AnimeDetails from './pages/AnimeDetails';
+import Anime from './pages/Anime'; // IMPORT ADDED
 import Manga from './pages/Manga';
 import MangaDetails from './pages/MangaDetails';
-import Movies from './pages/Movies'; // Make sure this is imported
+import Movies from './pages/Movies'; 
 import Search from './pages/Search';
 import Login from './pages/Login';
 import Watchlist from './pages/Watchlist';
@@ -20,6 +21,9 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        
+        {/* Anime Routes */}
+        <Route path="/anime" element={<Anime />} /> {/* ROUTE ADDED */}
         <Route path="/anime/:id" element={<AnimeDetails />} />
         
         {/* Manga Routes */}

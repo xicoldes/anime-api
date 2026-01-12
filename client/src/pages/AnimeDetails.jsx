@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { 
-    FaPlay, FaStar, FaPlus, FaCheck, FaChevronUp, FaUserAlt, 
-    FaHeart, FaUsers, FaHashtag, FaTv, FaCalendarAlt, FaClock 
+    FaPlay, FaStar, FaPlus, FaCheck, FaChevronUp, 
+    FaCalendarAlt, FaClock 
 } from 'react-icons/fa';
 
 const AnimeDetails = () => {
@@ -13,7 +13,6 @@ const AnimeDetails = () => {
   const [isAdded, setIsAdded] = useState(false);
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
 
-  // User Watchlist Logic
   const user = localStorage.getItem('user'); 
   const listKey = `watchlist_${user}`; 
 
@@ -27,10 +26,8 @@ const AnimeDetails = () => {
         }
     }
 
-    // Fetch Anime Details
     api.anime.getFull(id).then(res => setAnime(res.data.data));
     
-    // Fetch Characters
     api.anime.getCharacters(id)
         .then(res => setCharacters(res.data.data))
         .catch(err => console.error(err));
@@ -55,11 +52,20 @@ const AnimeDetails = () => {
 
   if (!anime) return <div className="h-screen flex items-center justify-center text-hianime-accent">Loading...</div>;
 
+  // Helper to check if it's a movie
+  const isMovie = anime.type === 'Movie';
+
   return (
     <div className="min-h-screen pb-20 bg-hianime-dark pt-24 text-gray-300">
-        <div className="max-w-[1400px] mx-auto px-6 flex flex-col lg:flex-row gap-10 animate-fade-in">
+        
+        {/* Header Background */}
+        <div className="absolute top-0 w-full h-[500px] overflow-hidden z-0 opacity-20 mask-image-b pointer-events-none">
+             <img src={anime.images.jpg.large_image_url} className="w-full h-full object-cover blur-3xl" alt="" />
+        </div>
+
+        <div className="relative z-10 max-w-[1400px] mx-auto px-6 flex flex-col lg:flex-row gap-10 animate-fade-in">
             
-            {/* --- COLUMN 1: POSTER (Fixed Width) --- */}
+            {/* --- COLUMN 1: POSTER --- */}
             <div className="w-full lg:w-[260px] shrink-0 flex flex-col gap-4">
                 <img 
                     src={anime.images.jpg.large_image_url} 
@@ -68,18 +74,16 @@ const AnimeDetails = () => {
                 />
             </div>
 
-            {/* --- COLUMN 2: MAIN CONTENT (Fluid) --- */}
+            {/* --- COLUMN 2: MAIN CONTENT --- */}
             <div className="flex-1">
-                {/* Header Info */}
                 <div className="mb-6">
                     <div className="text-hianime-accent font-bold text-sm tracking-widest uppercase mb-2">
                         #Ranked {anime.rank || 'N/A'}
                     </div>
-                    <h1 className="text-4xl font-extrabold text-white mb-4 leading-tight">
+                    <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 leading-tight">
                         {anime.title_english || anime.title}
                     </h1>
                     
-                    {/* Mini Stats Line */}
                     <div className="flex items-center gap-4 text-xs font-bold text-gray-400 mb-6">
                         <span className="bg-white text-black px-2 py-0.5 rounded uppercase">{anime.type}</span>
                         {anime.year && <span className="flex items-center gap-1"><FaCalendarAlt/> {anime.year}</span>}
@@ -87,9 +91,7 @@ const AnimeDetails = () => {
                         {anime.score && <span className="flex items-center gap-1 text-white"><FaStar className="text-yellow-400"/> {anime.score}</span>}
                     </div>
 
-                    {/* ACTION BUTTONS */}
                     <div className="flex flex-wrap gap-4 mb-8">
-                        {/* Watch Now Button */}
                         <a 
                             href={`https://hianime.nz/search?keyword=${encodeURIComponent(anime.title_english || anime.title)}`}
                             target="_blank" 
@@ -99,7 +101,6 @@ const AnimeDetails = () => {
                             <FaPlay /> Watch Now
                         </a>
 
-                        {/* Add to List Button */}
                         <button 
                             onClick={handleAddToList}
                             className={`px-8 py-3 rounded-full font-bold flex items-center gap-2 transition border border-white/10 ${
@@ -111,7 +112,6 @@ const AnimeDetails = () => {
                         </button>
                     </div>
 
-                    {/* Synopsis */}
                     <div className="mb-8">
                         <h3 className="text-white font-bold text-lg mb-3 border-b border-white/10 pb-2">Synopsis</h3>
                         <p className={`text-gray-400 leading-relaxed text-sm mb-2 transition-all ${showFullSynopsis ? '' : 'line-clamp-4'}`}>
@@ -125,7 +125,6 @@ const AnimeDetails = () => {
                         </button>
                     </div>
 
-                    {/* Trailer (New Feature for Detail Page) */}
                     {anime.trailer?.embed_url && (
                         <div className="mb-8">
                             <h3 className="text-white font-bold text-lg mb-4 border-b border-white/10 pb-2">Official Trailer</h3>
@@ -140,7 +139,6 @@ const AnimeDetails = () => {
                         </div>
                     )}
 
-                    {/* Characters Grid */}
                     {characters.length > 0 && (
                         <div className="mb-8">
                             <h3 className="text-white font-bold text-lg mb-4 border-b border-white/10 pb-2">Characters</h3>
@@ -168,10 +166,8 @@ const AnimeDetails = () => {
                 </div>
             </div>
 
-            {/* --- COLUMN 3: SIDEBAR (Fixed Width) --- */}
+            {/* --- COLUMN 3: SIDEBAR --- */}
             <div className="w-full lg:w-[300px] shrink-0 flex flex-col gap-6">
-                
-                {/* Information Card */}
                 <div className="bg-[#202225] p-5 rounded-xl border border-white/5 shadow-lg">
                     <h3 className="text-white font-bold mb-4 border-l-4 border-hianime-accent pl-3">Information</h3>
                     
@@ -208,14 +204,14 @@ const AnimeDetails = () => {
                         </div>
                     </div>
 
-                    {/* Genres Tag Cloud */}
                     <div className="mt-6">
                         <span className="font-bold text-white block mb-2 text-xs uppercase opacity-70">Genres</span>
                         <div className="flex flex-wrap gap-1.5">
-                            {[...(anime.genres || []), ...(anime.themes || [])].map(g => (
+                            {/* UPDATED LINK LOGIC: Links directly to /anime or /movies page to fix Back Button */}
+                            {[...(anime.genres || []), ...(anime.themes || []), ...(anime.demographics || [])].map(g => (
                                 <Link 
                                     key={g.mal_id} 
-                                    to={`/?genre=${g.mal_id}`}
+                                    to={isMovie ? `/movies?genre=${g.mal_id}` : `/anime?genre=${g.mal_id}`}
                                     className="text-[10px] border border-gray-600 px-2 py-1 rounded-full text-gray-400 hover:text-black hover:bg-hianime-accent hover:border-hianime-accent cursor-pointer transition"
                                 >
                                     {g.name}
@@ -225,7 +221,6 @@ const AnimeDetails = () => {
                     </div>
                 </div>
 
-                {/* Related Anime Card */}
                 {anime.relations && anime.relations.length > 0 && (
                     <div className="bg-[#202225] p-5 rounded-xl border border-white/5 shadow-lg">
                         <h3 className="text-white font-bold mb-4 border-l-4 border-hianime-accent pl-3">Related Anime</h3>
@@ -247,7 +242,6 @@ const AnimeDetails = () => {
                         </div>
                     </div>
                 )}
-
             </div>
         </div>
     </div>

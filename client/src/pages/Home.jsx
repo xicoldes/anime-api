@@ -1,45 +1,46 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link, useSearchParams, useLocation } from 'react-router-dom';
+import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero';
 import Trending from '../components/Trending';
 import { api } from '../services/api';
-import { FaFilter, FaFilm, FaChevronRight, FaTimes, FaRedo } from 'react-icons/fa';
-
-const ALLOWED_GENRES = [
-    'Action', 'Adventure', 'Cars', 'Comedy', 'Dementia', 'Demons', 'Drama', 
-    'Ecchi', 'Fantasy', 'Game', 'Harem', 'Historical', 'Horror', 'Isekai', 'Josei', 
-    'Kids', 'Magic', 'Martial Arts', 'Mecha', 'Military', 'Music', 'Mystery', 
-    'Parody', 'Police', 'Psychological', 'Romance', 'Samurai', 'School', 'Sci-Fi', 
-    'Seinen', 'Shoujo', 'Shoujo Ai', 'Shounen', 'Shounen Ai', 'Slice of Life', 
-    'Space', 'Sports', 'Super Power', 'Supernatural', 'Thriller', 'Vampire'
-];
+import { FaFilm, FaChevronRight } from 'react-icons/fa';
 
 const Home = () => {
   const [spotlight, setSpotlight] = useState([]); 
   const [trending, setTrending] = useState([]);
   const [latest, setLatest] = useState([]);
   const [movies, setMovies] = useState([]); 
-  const [genres, setGenres] = useState([]);
   
   const [searchParams] = useSearchParams();
-  const location = useLocation(); 
-  const [selectedGenre, setSelectedGenre] = useState(null);
-  const [filteredAnimes, setFilteredAnimes] = useState(null); 
-  const [showFilter, setShowFilter] = useState(false);
-
+  const navigate = useNavigate();
   const dataFetched = useRef(false);
 
+  // 1. Redirect filters to the dedicated pages
+  useEffect(() => {
+      const genreParam = searchParams.get('genre');
+      const typeParam = searchParams.get('type');
+      const viewParam = searchParams.get('view');
+
+      // If URL has genre or view=all, redirect to /anime (or /movies if specified)
+      if (genreParam || viewParam === 'all') {
+          if (typeParam === 'movie') {
+              navigate(`/movies?${searchParams.toString()}`);
+          } else {
+              navigate(`/anime?${searchParams.toString()}`);
+          }
+      }
+  }, [searchParams, navigate]);
+
+  // 2. Fetch Dashboard Data
   useEffect(() => {
     if (dataFetched.current) return;
     dataFetched.current = true;
 
     const fetchData = async () => {
         try {
-            // Spotlight (Page 1)
             const spotlightData = await api.anime.getSpotlight();
             setSpotlight(spotlightData);
             
-            // Trending (Page 2 - Seamless continuation)
             const trendingData = await api.anime.getTrending();
             setTrending(trendingData); 
             
@@ -56,61 +57,11 @@ const Home = () => {
             try {
                 const movieData = await api.movies.getTop();
                 setMovies(movieData.data.data);
-                
-                const genreData = await api.anime.getGenres();
-                const safeGenres = genreData.data.data
-                    .filter(g => ALLOWED_GENRES.includes(g.name))
-                    .sort((a, b) => a.name.localeCompare(b.name));
-                
-                setGenres(safeGenres);
-
-            } catch (err) { console.error("Background Load Error", err); }
+            } catch (err) { console.error("Movie Load Error", err); }
         }, 1200);
     };
     fetchData();
   }, []);
-
-  useEffect(() => {
-    if (location.pathname === '/' && !searchParams.toString()) {
-        resetView();
-    }
-  }, [location, searchParams]);
-
-  useEffect(() => {
-      const genreParam = searchParams.get('genre');
-      if (genreParam) {
-          const genreId = parseInt(genreParam);
-          setSelectedGenre(genreId);
-          setShowFilter(true);
-          performSearch(genreId);
-      }
-  }, [searchParams]);
-
-  const performSearch = async (genreId) => {
-    try {
-        const res = await api.anime.search('', genreId, 'members');
-        setFilteredAnimes(res.data.data);
-    } catch (err) { console.error(err); }
-  };
-
-  const handleGenreClick = (genreId) => {
-    setSelectedGenre(genreId);
-    performSearch(genreId);
-  };
-
-  const resetView = () => {
-      setSelectedGenre(null);
-      setFilteredAnimes(null);
-      setShowFilter(false);
-  };
-
-  const getSectionTitle = () => {
-      if (selectedGenre) {
-          const genreName = genres.find(g => g.mal_id === selectedGenre)?.name;
-          return genreName ? `Top ${genreName} Anime` : 'Search Results';
-      }
-      return 'Latest Episodes';
-  };
 
   return (
     <div>
@@ -119,35 +70,20 @@ const Home = () => {
       <div className="max-w-[1400px] mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
         
         <div className="lg:col-span-3">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div className="flex items-center gap-3 self-start md:self-auto">
-                    <h2 className="text-xl font-bold text-hianime-accent">{getSectionTitle()}</h2>
-                    {filteredAnimes && (
-                        <button onClick={resetView} className="text-xs text-red-400 hover:text-white flex items-center gap-1 bg-black/20 px-2 py-1 rounded border border-white/5 transition"><FaRedo size={10} /> Reset</button>
-                    )}
-                </div>
-                <div className="flex gap-4 w-full md:w-auto">
-                    <button onClick={() => setShowFilter(!showFilter)} className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-bold transition ${showFilter ? 'bg-hianime-accent text-black' : 'bg-[#202225] text-white hover:bg-white/10'}`}>
-                        {showFilter ? <><FaTimes /> Close</> : <><FaFilter /> Filter</>}
-                    </button>
-                </div>
+            
+            {/* --- LATEST EPISODES SECTION --- */}
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-hianime-accent">Latest Episodes</h2>
+                
+                {/* DIRECT LINK TO DEDICATED PAGE */}
+                <Link to="/anime" className="text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1 transition">
+                    View All <FaChevronRight size={10} />
+                </Link>
             </div>
 
-            {showFilter && (
-                <div className="bg-[#202225] p-6 rounded-xl mb-8 animate-fade-in border border-white/5">
-                    <div className="flex justify-between items-center mb-4"><h3 className="text-white font-bold text-sm">Genre</h3></div>
-                    <div className="flex flex-wrap gap-2">
-                        {genres.map(genre => (
-                            <button key={genre.mal_id} onClick={() => handleGenreClick(genre.mal_id)} className={`px-4 py-2 rounded-md text-sm transition border ${selectedGenre === genre.mal_id ? 'bg-hianime-accent text-black border-hianime-accent font-bold' : 'bg-[#151719] text-gray-400 border-[#2a2c31] hover:text-white hover:border-gray-500'}`}>
-                                {genre.name}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12 min-h-[500px]">
-                {(filteredAnimes || latest.slice(0, 12)).map(anime => (
+            {/* RESULTS GRID (Top 12 Only) */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
+                {latest.slice(0, 12).map(anime => (
                     <Link to={`/anime/${anime.mal_id}`} key={anime.mal_id} className="group relative cursor-pointer">
                         <div className="overflow-hidden rounded-lg aspect-[3/4] mb-2 relative">
                             <img src={anime.images.jpg.large_image_url} alt={anime.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
@@ -162,7 +98,8 @@ const Home = () => {
                 ))}
             </div>
 
-            {(!selectedGenre && movies.length > 0) && (
+            {/* --- MOVIES SECTION --- */}
+            {movies.length > 0 && (
                 <div className="animate-slide-up">
                     <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-2">
                         <h2 className="text-xl font-bold text-hianime-accent flex items-center gap-2"><FaFilm /> Popular Movies</h2>
@@ -183,7 +120,6 @@ const Home = () => {
             )}
         </div>
 
-        {/* FIX: self-start prevents the sticky bar from breaking */}
         <div className="lg:col-span-1 self-start">
             <Trending animes={trending} />
         </div>

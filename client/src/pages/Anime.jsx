@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { FaFilm, FaClock, FaStar, FaRedo, FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight, FaTimes, FaFilter } from 'react-icons/fa';
+import { FaPlayCircle, FaClock, FaRedo, FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight, FaTimes, FaFilter } from 'react-icons/fa';
 
-const Movies = () => {
-  const [movies, setMovies] = useState([]);
+const Anime = () => {
+  const [animes, setAnimes] = useState([]);
   const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,16 +21,15 @@ const Movies = () => {
 
   const [pagination, setPagination] = useState({ has_next_page: false, last_visible_page: 1 });
 
-  // 1. Fetch Genres (Cached Logic)
+  // 1. Fetch Genres (Cached)
   useEffect(() => {
     const fetchGenres = async () => {
-      // Check cache first
       const cachedGenres = localStorage.getItem('animewiki_genres');
       if (cachedGenres) {
           const parsed = JSON.parse(cachedGenres);
           if (Array.isArray(parsed) && parsed.length > 0) {
               setGenres(parsed);
-              return;
+              return; 
           }
       }
 
@@ -53,12 +52,13 @@ const Movies = () => {
             setGenres(uniqueGenres);
             localStorage.setItem('animewiki_genres', JSON.stringify(uniqueGenres));
         }
+
       } catch (err) { console.error("Genre Error", err); }
     };
     fetchGenres();
   }, []);
 
-  // 2. Fetch Movies (Auto-Retry Logic)
+  // 2. Main Data Fetching
   const fetchData = async (retryCount = 0) => {
     if (retryCount === 0) setLoading(true);
     setError(null);
@@ -67,82 +67,79 @@ const Movies = () => {
 
     try {
         let url;
-        // BASE QUERY: Always type=movie
-        let query = `type=movie&sfw=true&page=${page}&order_by=members&sort=desc`;
-
         if (selectedGenre) {
-            // GENRE FILTER
-            url = `https://api.jikan.moe/v4/anime?${query}&genres=${selectedGenre}`;
+            // FILTER MODE: Added &type=tv to exclude movies
+            url = `https://api.jikan.moe/v4/anime?sfw=true&type=tv&genres=${selectedGenre}&order_by=members&sort=desc&page=${page}`;
         } else {
-            // DEFAULT: Top Movies
-            // Note: Jikan's /top/anime doesn't support 'genre' param well mixed with others, 
-            // so we use the search endpoint for everything to be safe, or specific top endpoint for default.
-            url = `https://api.jikan.moe/v4/top/anime?type=movie&filter=bypopularity&sfw=true&page=${page}`;
+            // DEFAULT MODE: Added &filter=tv to exclude movies from seasonal
+            url = `https://api.jikan.moe/v4/seasons/now?sfw=true&filter=tv&page=${page}`;
         }
 
         const res = await axios.get(url);
         
         if (res.data.data) {
-            setMovies(res.data.data);
+            setAnimes(res.data.data);
             setPagination(res.data.pagination || { has_next_page: false });
             setLoading(false);
         } else {
-            throw new Error("No data");
+            throw new Error("No data returned");
         }
 
     } catch (err) {
         console.error(`Fetch Error (Attempt ${retryCount + 1}):`, err);
+        
         if (retryCount < 3) {
             setTimeout(() => fetchData(retryCount + 1), 1500);
         } else {
-            setMovies([]);
-            setError("Failed to load movies.");
+            setAnimes([]);
+            setError("API is currently busy. Please try again in a moment.");
             setLoading(false);
         }
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(); 
   }, [selectedGenre, page]);
 
   // --- Handlers ---
   const handlePageChange = (newPage) => {
       if (newPage < 1) return;
       if (pagination.last_visible_page && newPage > pagination.last_visible_page) return;
-      
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      
       const query = selectedGenre ? `?genre=${selectedGenre}&page=${newPage}` : `?page=${newPage}`;
-      navigate(`/movies${query}`);
+      navigate(`/anime${query}`);
   };
 
   const handleGenreClick = (genreId) => {
-      navigate(`/movies?genre=${genreId}&page=1`);
+      navigate(`/anime?genre=${genreId}&page=1`);
   };
 
   const resetView = () => {
       setShowFilter(false);
-      navigate('/movies');
+      navigate('/anime');
   };
 
   const getPageTitle = () => {
       if (selectedGenre) {
           const genreName = genres.find(g => g.mal_id === selectedGenre)?.name;
-          return genreName ? `Top ${genreName} Movies` : 'Movie Results';
+          return genreName ? `Top ${genreName} Anime` : 'Anime Results';
       }
-      return 'Top Anime Movies';
+      return 'Latest Episodes';
   };
 
-  if (loading && !movies.length) return <div className="min-h-screen pt-32 text-center text-hianime-accent font-bold text-xl">Loading Movies...</div>;
+  if (loading && !animes.length) {
+      return <div className="min-h-screen pt-32 text-center text-hianime-accent font-bold text-xl">Loading...</div>;
+  }
 
   return (
     <div className="pt-24 min-h-screen max-w-[1400px] mx-auto px-4 pb-20">
-        
         {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <div className="flex items-center gap-3 self-start md:self-auto">
                 <h1 className="text-2xl font-bold text-white border-l-4 border-hianime-accent pl-4 flex items-center gap-3">
-                    <FaFilm /> {getPageTitle()}
+                    <FaPlayCircle /> {getPageTitle()}
                 </h1>
                 {selectedGenre && (
                     <button onClick={resetView} className="text-xs text-red-400 hover:text-white flex items-center gap-1 bg-black/20 px-2 py-1 rounded border border-white/5 transition">
@@ -166,7 +163,8 @@ const Movies = () => {
         {/* --- GENRE PANEL --- */}
         {showFilter && (
             <div className="bg-[#202225] p-6 rounded-xl mb-8 animate-fade-in border border-white/5">
-                <div className="flex justify-between items-center mb-4"><h3 className="text-white font-bold text-sm">Filter Movies by Genre</h3></div>
+                <div className="flex justify-between items-center mb-4"><h3 className="text-white font-bold text-sm">Filter by Genre (TV Series Only)</h3></div>
+                
                 {genres.length > 0 ? (
                     <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-hianime-accent">
                         {genres.map(genre => (
@@ -189,33 +187,41 @@ const Movies = () => {
             </div>
         )}
 
-        {/* --- ERROR STATE --- */}
-        {!loading && movies.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-                <p className="text-lg mb-4">{error || "No movies found."}</p>
-                <button onClick={() => fetchData(0)} className="px-6 py-2 bg-hianime-accent text-black rounded-full font-bold hover:bg-white transition">Retry Connection</button>
+        {/* --- ERROR / EMPTY STATE --- */}
+        {!loading && animes.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-gray-500 animate-fade-in">
+                <p className="text-lg mb-4">{error || "No anime found."}</p>
+                <button 
+                    onClick={() => fetchData(0)} 
+                    className="px-6 py-2 bg-hianime-accent text-black rounded-full font-bold hover:bg-white transition"
+                >
+                    Retry Connection
+                </button>
             </div>
         )}
 
-        {/* --- MOVIES GRID --- */}
-        {movies.length > 0 && (
+        {/* --- ANIME GRID --- */}
+        {animes.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {movies.map(movie => (
-                    <Link to={`/anime/${movie.mal_id}`} key={movie.mal_id} className="group cursor-pointer">
+                {animes.map(anime => (
+                    <Link to={`/anime/${anime.mal_id}`} key={anime.mal_id} className="group cursor-pointer">
                         <div className="overflow-hidden rounded-lg aspect-[3/4] mb-3 relative">
-                            <img src={movie.images.jpg.large_image_url} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                            <div className="absolute top-2 left-2 bg-hianime-accent text-black text-[10px] font-bold px-2 py-0.5 rounded-sm">
-                                {movie.score ? `★ ${movie.score}` : 'Movie'}
+                            <img src={anime.images.jpg.large_image_url} alt={anime.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                            <div className="absolute top-2 left-2 bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
+                                {anime.score ? `★ ${anime.score}` : 'Ep ?'}
+                            </div>
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                                <FaPlayCircle className="text-white text-4xl drop-shadow-lg" />
                             </div>
                         </div>
                         
                         <h3 className="font-bold text-sm text-gray-200 group-hover:text-hianime-accent truncate transition">
-                            {movie.title_english || movie.title}
+                            {anime.title_english || anime.title}
                         </h3>
                         <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                            <span className="flex items-center gap-1"><FaClock className="text-[10px]"/> {movie.duration || '?'}</span>
+                            <span className="flex items-center gap-1"><FaClock className="text-[10px]"/> {anime.duration || '24m'}</span>
                             <span>•</span>
-                            <span>{movie.year || 'N/A'}</span>
+                            <span>{anime.year || 'N/A'}</span>
                         </div>
                     </Link>
                 ))}
@@ -223,7 +229,7 @@ const Movies = () => {
         )}
 
         {/* --- PAGINATION --- */}
-        {movies.length > 0 && (
+        {animes.length > 0 && (
             <div className="flex justify-center items-center gap-2 mt-12 animate-fade-in">
                 <button onClick={() => handlePageChange(1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleDoubleLeft /></button>
                 <button onClick={() => handlePageChange(page - 1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#202225] text-gray-400 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"><FaAngleLeft /></button>
@@ -245,4 +251,4 @@ const Movies = () => {
   );
 };
 
-export default Movies;
+export default Anime;
