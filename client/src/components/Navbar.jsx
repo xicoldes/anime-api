@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaDatabase, FaBars, FaTimes } from 'react-icons/fa'; 
+import { FaSearch, FaDatabase, FaBars, FaTimes, FaCaretDown } from 'react-icons/fa'; 
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { api } from '../services/api'; 
 import { BANNED_IDS } from '../utils/banned'; 
@@ -8,16 +8,29 @@ const Navbar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]); 
   const [showDropdown, setShowDropdown] = useState(false);
+  
+  // Search Type State
+  const [searchType, setSearchType] = useState('all'); 
+  const [showTypeMenu, setShowTypeMenu] = useState(false);
+
   const [user, setUser] = useState(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false); 
   
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef(null);
+  const typeMenuRef = useRef(null);
 
-  // --- DETECT MODES ---
-  const isMangaMode = location.pathname.includes('/manga');
-  const isMovieMode = location.pathname.includes('/movies'); // Added Movie Mode detection
+  // Check if we are on the Manga page to force manga mode
+  const isMangaPage = location.pathname.includes('/manga');
+
+  useEffect(() => {
+    if (isMangaPage) {
+        setSearchType('manga');
+    } else if (searchType === 'manga') {
+        setSearchType('all');
+    }
+  }, [isMangaPage]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -26,6 +39,9 @@ const Navbar = () => {
     const handleClickOutside = (event) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
             setShowDropdown(false);
+        }
+        if (typeMenuRef.current && !typeMenuRef.current.contains(event.target)) {
+            setShowTypeMenu(false);
         }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -42,18 +58,18 @@ const Navbar = () => {
           }
 
           try {
-              const searchCall = isMangaMode ? api.manga.search(query) : api.anime.search(query);
+              const isManga = searchType === 'manga';
+              const searchCall = isManga ? api.manga.search(query) : api.anime.search(query);
+              
               const { data } = await searchCall;
 
               // --- FILTER LOGIC ---
               const cleanResults = data.data.filter(item => {
-                  // 1. Check Banned
                   const isBanned = BANNED_IDS.some(bannedId => String(bannedId) === String(item.mal_id));
-                  // 2. Check English Title
                   const hasEnglishTitle = item.title_english != null;
                   
-                  // 3. MOVIE MODE FILTER: Only allow type "Movie"
-                  if (isMovieMode && item.type !== 'Movie') return false;
+                  if (searchType === 'movie' && item.type !== 'Movie') return false;
+                  if (searchType === 'anime' && item.type === 'Movie') return false;
 
                   return !isBanned && hasEnglishTitle;
               });
@@ -67,20 +83,19 @@ const Navbar = () => {
 
       const timeoutId = setTimeout(fetchResults, 500); 
       return () => clearTimeout(timeoutId);
-  }, [query, isMangaMode, isMovieMode]); // Added isMovieMode dependency
+  }, [query, searchType]);
 
   // --- SUBMIT LOGIC ---
   const handleSubmit = (e) => {
     e.preventDefault();
     if(query) {
-        let typeParam = '&type=anime';
+        let url = `/search?q=${query}`;
         
-        // Adjust type based on current page
-        if (isMangaMode) typeParam = '&type=manga';
-        if (isMovieMode) typeParam = '&type=movie'; // Send 'movie' type
+        if (searchType === 'manga') url += '&type=manga';
+        if (searchType === 'movie') url += '&type=movie';
+        if (searchType === 'anime') url += '&type=tv'; 
 
-        navigate(`/search?q=${query}${typeParam}`);
-        
+        navigate(url);
         setShowDropdown(false);
         setQuery('');
         setIsMobileOpen(false); 
@@ -92,21 +107,19 @@ const Navbar = () => {
       window.location.href = '/';
   };
 
-  // Dynamic Placeholder Text
-  const getPlaceholder = () => {
-      if (isMangaMode) return "Search Manga...";
-      if (isMovieMode) return "Search Movies...";
-      return "Search Anime...";
+  const getTypeLabel = () => {
+      if (searchType === 'manga') return 'Manga';
+      if (searchType === 'movie') return 'Movies';
+      if (searchType === 'anime') return 'Anime';
+      return 'All';
   };
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-hianime-dark/95 backdrop-blur-md px-4 md:px-6 py-4 flex items-center justify-between shadow-xl border-b border-white/5">
       
+      {/* Left Side */}
       <div className="flex items-center gap-4">
-        <button 
-            className="md:hidden text-white text-xl p-2"
-            onClick={() => setIsMobileOpen(!isMobileOpen)}
-        >
+        <button className="md:hidden text-white text-xl p-2" onClick={() => setIsMobileOpen(!isMobileOpen)}>
             {isMobileOpen ? <FaTimes /> : <FaBars />}
         </button>
 
@@ -116,36 +129,70 @@ const Navbar = () => {
         </Link>
         
         <div className="hidden md:flex gap-6 text-gray-400 font-medium text-sm ml-4">
-            <Link to="/" className={`hover:text-white transition ${!isMangaMode && !isMovieMode ? 'text-white font-bold' : ''}`}>Home</Link>
-            <Link to="/manga" className={`hover:text-white transition ${isMangaMode ? 'text-white font-bold' : ''}`}>Manga Database</Link>
+            <Link to="/" className={`hover:text-white transition ${!isMangaPage ? 'text-white font-bold' : ''}`}>Home</Link>
+            <Link to="/manga" className={`hover:text-white transition ${isMangaPage ? 'text-white font-bold' : ''}`}>Manga Database</Link>
             <Link to="/watchlist" className="hover:text-white transition">My Collections</Link>
         </div>
       </div>
 
+      {/* --- CENTER SEARCH BAR --- */}
       <div className="flex items-center gap-4 relative" ref={dropdownRef}>
         
-        <form onSubmit={handleSubmit} className="hidden md:flex bg-hianime-sidebar border border-white/10 rounded-full overflow-hidden h-10 w-80 focus-within:border-hianime-accent transition duration-300 relative z-50">
+        {/* REMOVED 'overflow-hidden' from form class */}
+        <form onSubmit={handleSubmit} className="hidden md:flex bg-hianime-sidebar border border-white/10 rounded-full h-10 w-[450px] focus-within:border-hianime-accent transition duration-300 relative z-50">
+            
+            {/* TYPE SELECTOR */}
+            <div className="relative border-r border-white/10 h-full" ref={typeMenuRef}>
+                <button 
+                    type="button"
+                    onClick={() => setShowTypeMenu(!showTypeMenu)}
+                    // Added rounded-l-full to maintain shape
+                    className="h-full px-4 flex items-center gap-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 transition bg-black/20 min-w-[90px] justify-between rounded-l-full"
+                >
+                    {getTypeLabel()} <FaCaretDown />
+                </button>
+
+                {showTypeMenu && (
+                    <div className="absolute top-12 left-0 bg-[#151719] border border-white/10 rounded-lg shadow-xl overflow-hidden min-w-[120px] animate-fade-in z-50">
+                        {['all', 'anime', 'movie', 'manga'].map((t) => (
+                            <button
+                                key={t}
+                                type="button"
+                                onClick={() => { setSearchType(t); setShowTypeMenu(false); }}
+                                className={`block w-full text-left px-4 py-2 text-xs font-bold hover:bg-white/10 transition capitalize ${searchType === t ? 'text-hianime-accent' : 'text-gray-400'}`}
+                            >
+                                {t === 'all' ? 'All' : t}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* INPUT FIELD */}
             <input 
                 type="text" 
-                placeholder={getPlaceholder()} 
+                placeholder={`Search ${getTypeLabel()}...`} 
                 className="flex-1 px-4 bg-transparent text-white text-sm outline-none placeholder-gray-500"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => { if(results.length > 0) setShowDropdown(true); }}
             />
-            <button type="submit" className="px-4 text-gray-400 hover:text-white">
+            {/* Added rounded-r-full */}
+            <button type="submit" className="px-4 text-gray-400 hover:text-white rounded-r-full">
                 <FaSearch />
             </button>
         </form>
 
+        {/* --- LIVE RESULTS DROPDOWN --- */}
         {showDropdown && results.length > 0 && (
-            <div className="hidden md:block absolute top-12 right-0 w-80 bg-hianime-sidebar rounded-xl shadow-2xl border border-white/10 overflow-hidden animate-fade-in z-40">
-                <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-black/20">
-                    {isMangaMode ? "Manga Results" : (isMovieMode ? "Movie Results" : "Anime Results")}
+            <div className="hidden md:block absolute top-12 right-0 w-[450px] bg-hianime-sidebar rounded-xl shadow-2xl border border-white/10 overflow-hidden animate-fade-in z-40">
+                <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-black/20 flex justify-between">
+                    <span>Results</span>
+                    <span className="text-hianime-accent">{getTypeLabel()}</span>
                 </div>
                 {results.map(item => (
                     <Link 
-                        to={isMangaMode ? `/manga/${item.mal_id}` : `/anime/${item.mal_id}`} 
+                        to={item.type === 'Manga' ? `/manga/${item.mal_id}` : `/anime/${item.mal_id}`} 
                         key={item.mal_id}
                         onClick={() => { setShowDropdown(false); setQuery(''); }}
                         className="flex gap-3 p-3 hover:bg-white/5 transition border-b border-white/5 last:border-0"
@@ -170,21 +217,19 @@ const Navbar = () => {
             </div>
         )}
         
+        {/* User Section */}
         <div className="hidden md:flex items-center gap-3">
             {user ? (
                 <>
                     <span className="text-gray-300 text-sm font-medium capitalize">{user}</span>
-                    <button onClick={handleLogout} className="bg-hianime-sidebar border border-white/10 text-white px-4 py-2 rounded-full font-bold hover:bg-red-500 hover:border-red-500 transition text-xs">
-                        Logout
-                    </button>
+                    <button onClick={handleLogout} className="bg-hianime-sidebar border border-white/10 text-white px-4 py-2 rounded-full font-bold hover:bg-red-500 hover:border-red-500 transition text-xs">Logout</button>
                 </>
             ) : (
-                <Link to="/login" className="bg-hianime-accent text-hianime-dark px-6 py-2 rounded-full font-bold hover:bg-white transition text-xs shadow-[0_0_10px_rgba(56,189,248,0.4)]">
-                    Login
-                </Link>
+                <Link to="/login" className="bg-hianime-accent text-hianime-dark px-6 py-2 rounded-full font-bold hover:bg-white transition text-xs shadow-[0_0_10px_rgba(56,189,248,0.4)]">Login</Link>
             )}
         </div>
 
+        {/* Mobile Toggle */}
         <div className="flex items-center gap-3 md:hidden">
             <button className="text-white text-xl" onClick={() => setIsMobileOpen(!isMobileOpen)}>
                 <FaSearch />
@@ -192,33 +237,52 @@ const Navbar = () => {
             {user ? (
                  <button onClick={handleLogout} className="text-white text-sm font-bold">Logout</button>
             ) : (
-                <Link to="/login" className="bg-hianime-accent text-hianime-dark px-4 py-1.5 rounded-full font-bold hover:bg-white transition text-sm shadow-[0_0_10px_rgba(56,189,248,0.4)]">
-                    Login
-                </Link>
+                <Link to="/login" className="bg-hianime-accent text-hianime-dark px-4 py-1.5 rounded-full font-bold hover:bg-white transition text-sm shadow-[0_0_10px_rgba(56,189,248,0.4)]">Login</Link>
             )}
         </div>
 
       </div>
 
+      {/* --- MOBILE MENU --- */}
       {isMobileOpen && (
         <div className="absolute top-16 left-0 w-full bg-[#151719] border-t border-white/10 shadow-2xl p-4 flex flex-col gap-4 md:hidden animate-slide-down">
             
-            <form onSubmit={handleSubmit} className="bg-black/40 border border-white/10 rounded-lg flex items-center p-2">
-                <FaSearch className="text-gray-500 ml-2" />
-                <input 
-                    type="text" 
-                    placeholder={getPlaceholder()} 
-                    className="flex-1 bg-transparent px-3 text-white text-sm outline-none"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                />
-            </form>
+            {/* Mobile Search */}
+            <div className="flex flex-col gap-2">
+                {/* Mobile Type Selector */}
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                    {['all', 'anime', 'movie', 'manga'].map(t => (
+                        <button 
+                            key={t}
+                            onClick={() => setSearchType(t)}
+                            className={`px-3 py-1 rounded-full text-xs font-bold capitalize border transition ${
+                                searchType === t 
+                                ? 'bg-hianime-accent text-black border-hianime-accent' 
+                                : 'bg-transparent text-gray-400 border-white/10'
+                            }`}
+                        >
+                            {t}
+                        </button>
+                    ))}
+                </div>
 
-            {query.length >= 3 && results.length > 0 && (
+                <form onSubmit={handleSubmit} className="bg-black/40 border border-white/10 rounded-lg flex items-center p-2">
+                    <FaSearch className="text-gray-500 ml-2" />
+                    <input 
+                        type="text" 
+                        placeholder={`Search ${getTypeLabel()}...`} 
+                        className="flex-1 bg-transparent px-3 text-white text-sm outline-none"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                    />
+                </form>
+            </div>
+
+            {results.length > 0 && (
                 <div className="bg-black/20 rounded-lg p-2 max-h-40 overflow-y-auto">
                     {results.slice(0, 3).map(item => (
                          <Link 
-                            to={isMangaMode ? `/manga/${item.mal_id}` : `/anime/${item.mal_id}`} 
+                            to={item.type === 'Manga' ? `/manga/${item.mal_id}` : `/anime/${item.mal_id}`} 
                             key={item.mal_id}
                             onClick={() => setIsMobileOpen(false)}
                             className="flex items-center gap-3 p-2 hover:bg-white/5 rounded"
