@@ -1,6 +1,6 @@
 # 🍙 AniManga - Ultimate Discovery Platform
 
-<img width="1919" height="1058" alt="AniManga Dashboard" src="https://github.com/user-attachments/assets/a92ff77c-a73e-4f22-aefe-54ab09055f76" />
+<img width="1919" height="1054" alt="image" src="https://github.com/user-attachments/assets/ce416022-a89b-4909-96fc-a5004f4a719a" />
 
 > A modern, responsive, and feature-rich anime & manga discovery web application powered by the **Jikan API (MyAnimeList)**. Built with React and Tailwind CSS.
 
