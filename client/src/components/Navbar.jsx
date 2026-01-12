@@ -9,7 +9,7 @@ const Navbar = () => {
   const [results, setResults] = useState([]); 
   const [showDropdown, setShowDropdown] = useState(false);
   
-  // Search Type State (Internal values: 'all', 'anime', 'movie', 'manga')
+  // Search Type State
   const [searchType, setSearchType] = useState('all'); 
   const [showTypeMenu, setShowTypeMenu] = useState(false);
 
@@ -21,16 +21,22 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
   const typeMenuRef = useRef(null);
 
-  // Check if we are on the Manga page to force manga mode
-  const isMangaPage = location.pathname.includes('/manga');
+  // --- PAGE DETECTION ---
+  const path = location.pathname;
+  const isMangaPage = path.includes('/manga');
+  const isMoviesPage = path.includes('/movies');
 
   useEffect(() => {
+    // Smart Defaults for Search Type based on Page
     if (isMangaPage) {
         setSearchType('manga');
-    } else if (searchType === 'manga') {
+    } else if (isMoviesPage) {
+        setSearchType('movie');
+    } else if (searchType === 'manga' || searchType === 'movie') {
+        // Reset to 'all' if leaving those pages
         setSearchType('all');
     }
-  }, [isMangaPage]);
+  }, [isMangaPage, isMoviesPage]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -63,13 +69,12 @@ const Navbar = () => {
               
               const { data } = await searchCall;
 
-              // --- FILTER LOGIC ---
               const cleanResults = data.data.filter(item => {
                   const isBanned = BANNED_IDS.some(bannedId => String(bannedId) === String(item.mal_id));
                   const hasEnglishTitle = item.title_english != null;
                   
                   if (searchType === 'movie' && item.type !== 'Movie') return false;
-                  if (searchType === 'anime' && item.type === 'Movie') return false; // 'anime' means Series (TV)
+                  if (searchType === 'anime' && item.type === 'Movie') return false; 
 
                   return !isBanned && hasEnglishTitle;
               });
@@ -107,13 +112,11 @@ const Navbar = () => {
       window.location.href = '/';
   };
 
-  // --- DISPLAY LABELS ---
   const getTypeLabel = (type) => {
-      // Use passed type or current state
       const t = type || searchType;
       if (t === 'manga') return 'Manga';
       if (t === 'movie') return 'Movies';
-      if (t === 'anime') return 'Series'; // Renamed "Anime" to "Series"
+      if (t === 'anime') return 'Series';
       return 'All';
   };
 
@@ -131,19 +134,30 @@ const Navbar = () => {
           <span>Ani<span className="text-hianime-accent">Manga</span></span>
         </Link>
         
+        {/* --- DESKTOP NAV LINKS (UPDATED) --- */}
         <div className="hidden md:flex gap-6 text-gray-400 font-medium text-sm ml-4">
-            <Link to="/" className={`hover:text-white transition ${!isMangaPage ? 'text-white font-bold' : ''}`}>Home</Link>
-            <Link to="/manga" className={`hover:text-white transition ${isMangaPage ? 'text-white font-bold' : ''}`}>Manga Database</Link>
-            <Link to="/watchlist" className="hover:text-white transition">My Collections</Link>
+            <Link to="/" className={`hover:text-white transition ${path === '/' ? 'text-white font-bold' : ''}`}>
+                Home
+            </Link>
+            
+            <Link to="/movies" className={`hover:text-white transition ${isMoviesPage ? 'text-white font-bold' : ''}`}>
+                Movies Database
+            </Link>
+
+            <Link to="/manga" className={`hover:text-white transition ${isMangaPage ? 'text-white font-bold' : ''}`}>
+                Manga Database
+            </Link>
+
+            <Link to="/watchlist" className={`hover:text-white transition ${path.includes('/watchlist') ? 'text-white font-bold' : ''}`}>
+                My Collections
+            </Link>
         </div>
       </div>
 
-      {/* --- CENTER SEARCH BAR --- */}
+      {/* Center Search Bar */}
       <div className="flex items-center gap-4 relative" ref={dropdownRef}>
         
         <form onSubmit={handleSubmit} className="hidden md:flex bg-hianime-sidebar border border-white/10 rounded-full h-10 w-[450px] focus-within:border-hianime-accent transition duration-300 relative z-50">
-            
-            {/* TYPE SELECTOR */}
             <div className="relative border-r border-white/10 h-full" ref={typeMenuRef}>
                 <button 
                     type="button"
@@ -162,14 +176,13 @@ const Navbar = () => {
                                 onClick={() => { setSearchType(t); setShowTypeMenu(false); }}
                                 className={`block w-full text-left px-4 py-2 text-xs font-bold hover:bg-white/10 transition capitalize ${searchType === t ? 'text-hianime-accent' : 'text-gray-400'}`}
                             >
-                                {getTypeLabel(t)} {/* Uses "Series" instead of "Anime" */}
+                                {getTypeLabel(t)}
                             </button>
                         ))}
                     </div>
                 )}
             </div>
 
-            {/* INPUT FIELD */}
             <input 
                 type="text" 
                 placeholder={`Search ${getTypeLabel()}...`} 
@@ -183,7 +196,6 @@ const Navbar = () => {
             </button>
         </form>
 
-        {/* --- LIVE RESULTS DROPDOWN --- */}
         {showDropdown && results.length > 0 && (
             <div className="hidden md:block absolute top-12 right-0 w-[450px] bg-hianime-sidebar rounded-xl shadow-2xl border border-white/10 overflow-hidden animate-fade-in z-40">
                 <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-black/20 flex justify-between">
@@ -217,7 +229,6 @@ const Navbar = () => {
             </div>
         )}
         
-        {/* User Section */}
         <div className="hidden md:flex items-center gap-3">
             {user ? (
                 <>
@@ -229,7 +240,6 @@ const Navbar = () => {
             )}
         </div>
 
-        {/* Mobile Toggle */}
         <div className="flex items-center gap-3 md:hidden">
             <button className="text-white text-xl" onClick={() => setIsMobileOpen(!isMobileOpen)}>
                 <FaSearch />
@@ -243,13 +253,11 @@ const Navbar = () => {
 
       </div>
 
-      {/* --- MOBILE MENU --- */}
+      {/* --- MOBILE MENU (UPDATED) --- */}
       {isMobileOpen && (
         <div className="absolute top-16 left-0 w-full bg-[#151719] border-t border-white/10 shadow-2xl p-4 flex flex-col gap-4 md:hidden animate-slide-down">
             
-            {/* Mobile Search */}
             <div className="flex flex-col gap-2">
-                {/* Mobile Type Selector */}
                 <div className="flex gap-2 overflow-x-auto pb-2">
                     {['all', 'anime', 'movie', 'manga'].map(t => (
                         <button 
@@ -295,8 +303,12 @@ const Navbar = () => {
             )}
 
             <div className="flex flex-col gap-2">
-                <Link to="/" onClick={() => setIsMobileOpen(false)} className="text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5">Home</Link>
-                <Link to="/manga" onClick={() => setIsMobileOpen(false)} className="text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5">Manga Database</Link>
+                <Link to="/" onClick={() => setIsMobileOpen(false)} className={`text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5 ${path === '/' ? 'text-white font-bold' : ''}`}>Home</Link>
+                
+                <Link to="/movies" onClick={() => setIsMobileOpen(false)} className={`text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5 ${isMoviesPage ? 'text-white font-bold' : ''}`}>Movies Database</Link>
+                
+                <Link to="/manga" onClick={() => setIsMobileOpen(false)} className={`text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5 ${isMangaPage ? 'text-white font-bold' : ''}`}>Manga Database</Link>
+                
                 <Link to="/watchlist" onClick={() => setIsMobileOpen(false)} className="text-gray-300 hover:text-hianime-accent py-2 border-b border-white/5">My Collections</Link>
             </div>
         </div>
