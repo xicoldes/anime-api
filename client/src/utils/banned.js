@@ -5,6 +5,7 @@
 export const BANNED_IDS = [
     2981,
     9057,
-    6680, // Example // Example
+    6680,
+    55967, // Example // Example
     // Add your specific IDs here
 ];
