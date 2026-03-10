@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero';
 import Trending from '../components/Trending';
-import { api } from '../services/api';
+import { api } from '../services/api'; // <-- Reverted back to your custom API service
 import { FaFilm, FaChevronRight } from 'react-icons/fa';
+import { BANNED_IDS } from '../utils/banned'; // <-- Keep the Ban List
 
 const Home = () => {
   const [spotlight, setSpotlight] = useState([]); 
@@ -38,25 +39,41 @@ const Home = () => {
 
     const fetchData = async () => {
         try {
+            // --- Original Spotlight with Ban Filter ---
             const spotlightData = await api.anime.getSpotlight();
-            setSpotlight(spotlightData);
+            const cleanSpotlight = spotlightData.filter(item => 
+                !BANNED_IDS.some(id => String(id) === String(item.mal_id))
+            );
+            setSpotlight(cleanSpotlight);
             
+            // --- Original Trending with Ban Filter ---
             const trendingData = await api.anime.getTrending();
-            setTrending(trendingData); 
+            const cleanTrending = trendingData.filter(item => 
+                !BANNED_IDS.some(id => String(id) === String(item.mal_id))
+            );
+            setTrending(cleanTrending); 
             
         } catch (err) { console.error("Initial Load Error", err); }
 
         setTimeout(async () => {
             try {
+                // --- Original Latest with Ban Filter ---
                 const latestData = await api.seasons.getNow();
-                setLatest(latestData.data.data);
+                const cleanLatest = latestData.data.data.filter(item => 
+                    !BANNED_IDS.some(id => String(id) === String(item.mal_id))
+                );
+                setLatest(cleanLatest);
             } catch (err) { console.error("Latest Error", err); }
         }, 600);
 
         setTimeout(async () => {
             try {
+                // --- Original Movies with Ban Filter ---
                 const movieData = await api.movies.getTop();
-                setMovies(movieData.data.data);
+                const cleanMovies = movieData.data.data.filter(item => 
+                    !BANNED_IDS.some(id => String(id) === String(item.mal_id))
+                );
+                setMovies(cleanMovies);
             } catch (err) { console.error("Movie Load Error", err); }
         }, 1200);
     };
