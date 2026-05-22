@@ -5,7 +5,7 @@ import {
     FaPlay, FaStar, FaPlus, FaCheck, FaChevronUp, 
     FaCalendarAlt, FaClock, FaExclamationTriangle
 } from 'react-icons/fa';
-import { BANNED_IDS } from '../utils/banned'; // <--- IMPORT THIS
+import { BANNED_IDS } from '../utils/banned'; 
 
 const AnimeDetails = () => {
   const { id } = useParams();
@@ -13,16 +13,15 @@ const AnimeDetails = () => {
   const [characters, setCharacters] = useState([]);
   const [isAdded, setIsAdded] = useState(false);
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
 
   const user = localStorage.getItem('user'); 
   const listKey = `watchlist_${user}`; 
 
-  // --- CHECK BAN STATUS IMMEDIATELY ---
   const isBanned = BANNED_IDS.some(bannedId => String(bannedId) === String(id));
 
   useEffect(() => {
-    if (isBanned) return; // Don't fetch if banned
+    if (isBanned) return; 
 
     window.scrollTo(0, 0);
     setLoading(true);
@@ -34,7 +33,6 @@ const AnimeDetails = () => {
         }
     }
 
-    // Fetch Data
     api.anime.getFull(id)
         .then(res => {
             setAnime(res.data.data);
@@ -51,7 +49,6 @@ const AnimeDetails = () => {
 
   }, [id, listKey, user, isBanned]);
 
-  // --- SHOW "404" IF BANNED ---
   if (isBanned) {
       return (
         <div className="h-screen flex flex-col items-center justify-center text-gray-400 bg-hianime-dark">
@@ -88,14 +85,12 @@ const AnimeDetails = () => {
   return (
     <div className="min-h-screen pb-20 bg-hianime-dark pt-24 text-gray-300">
         
-        {/* Header Background */}
         <div className="absolute top-0 w-full h-[500px] overflow-hidden z-0 opacity-20 mask-image-b pointer-events-none">
              <img src={anime.images.jpg.large_image_url} className="w-full h-full object-cover blur-3xl" alt="" />
         </div>
 
         <div className="relative z-10 max-w-[1400px] mx-auto px-6 flex flex-col lg:flex-row gap-10 animate-fade-in">
             
-            {/* --- COLUMN 1: POSTER --- */}
             <div className="w-full lg:w-[260px] shrink-0 flex flex-col gap-4">
                 <img 
                     src={anime.images.jpg.large_image_url} 
@@ -104,7 +99,6 @@ const AnimeDetails = () => {
                 />
             </div>
 
-            {/* --- COLUMN 2: MAIN CONTENT --- */}
             <div className="flex-1">
                 <div className="mb-6">
                     <div className="text-hianime-accent font-bold text-sm tracking-widest uppercase mb-2">
@@ -122,8 +116,9 @@ const AnimeDetails = () => {
                     </div>
 
                     <div className="flex flex-wrap gap-4 mb-8">
+                        {/* --- UPDATED MIRURO LINK --- */}
                         <a 
-                            href={`https://hianime.nz/search?keyword=${encodeURIComponent(anime.title_english || anime.title)}`}
+                            href={`https://www.miruro.tv/search?query=${encodeURIComponent(anime.title_english || anime.title)}&type=ANIME&sort=POPULARITY_DESC`}
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="bg-hianime-accent text-black px-8 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-white hover:scale-105 transition shadow-[0_0_15px_rgba(56,189,248,0.3)]"
@@ -196,7 +191,6 @@ const AnimeDetails = () => {
                 </div>
             </div>
 
-            {/* --- COLUMN 3: SIDEBAR --- */}
             <div className="w-full lg:w-[300px] shrink-0 flex flex-col gap-6">
                 <div className="bg-[#202225] p-5 rounded-xl border border-white/5 shadow-lg">
                     <h3 className="text-white font-bold mb-4 border-l-4 border-hianime-accent pl-3">Information</h3>
