@@ -130,7 +130,7 @@ const Hero = ({ animes }) => {
                 
                 <div className="flex flex-row gap-3">
                     <a 
-                        href={`https://hianime.nz/search?keyword=${encodeURIComponent(anime.title_english || anime.title)}`}
+                        href={`https://www.miruro.tv/search?query=${encodeURIComponent(anime.title_english || anime.title)}&type=ANIME&sort=POPULARITY_DESC`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-hianime-accent text-black px-6 py-2 md:px-8 md:py-2.5 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-white hover:scale-105 transition shadow-[0_0_15px_rgba(56,189,248,0.3)] text-xs md:text-sm w-auto"
