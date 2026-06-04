@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# 🍙 AniManga - Ultimate Discovery Platform
-=======
 # 🍙 AniManga - Anime + Manga Discovery Platform
 >>>>>>> 24d2cc599b31c3b7a87bec3ad8622f4f17581bba
 
