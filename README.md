@@ -1,5 +1,4 @@
 # 🍙 AniManga - Anime + Manga Discovery Platform
->>>>>>> 24d2cc599b31c3b7a87bec3ad8622f4f17581bba
 
 <img width="1919" height="1053" alt="image" src="https://github.com/user-attachments/assets/af9c488d-ec3b-4655-9c09-f4468824b785" />
 
