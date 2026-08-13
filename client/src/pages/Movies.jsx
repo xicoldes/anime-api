@@ -36,9 +36,9 @@ const Movies = () => {
 
       try {
         const results = await Promise.allSettled([
-            axios.get('https://api.jikan.moe/v4/genres/anime'),
-            axios.get('https://api.jikan.moe/v4/genres/anime?filter=themes'),
-            axios.get('https://api.jikan.moe/v4/genres/anime?filter=demographics')
+            axios.get('https://tenrai.org/v1/genres/anime'),
+            axios.get('https://api.tenrai.org/v1/genres/anime?filter=themes'),
+            axios.get('https://api.tenrai.org/v1/genres/anime?filter=demographics')
         ]);
 
         const combinedGenres = results
@@ -71,10 +71,10 @@ const Movies = () => {
 
         if (selectedGenre) {
             // GENRE FILTER: Forces type=movie
-            url = `https://api.jikan.moe/v4/anime?${query}&genres=${selectedGenre}`;
+            url = `https://api.tenrai.org/v1/anime?${query}&genres=${selectedGenre}`;
         } else {
             // DEFAULT: Top Popular Movies
-            url = `https://api.jikan.moe/v4/top/anime?type=movie&filter=bypopularity&sfw=true&page=${page}`;
+            url = `https://api.tenrai.org/v1/top/anime?type=movie&filter=bypopularity&sfw=true&page=${page}`;
         }
 
         const res = await axios.get(url);
