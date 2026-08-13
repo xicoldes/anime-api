@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE = "https://api.jikan.moe/v4";
+const BASE = "https://api.tenrai.org/v1";
 
 export const api = {
     // --- ANIME ---
